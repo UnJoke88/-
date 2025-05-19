@@ -65,21 +65,223 @@ namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
 
         #region Методы
 
+        ///<summary>
+        ///Пополняет счёт на указанную сумму.
+        ///</summary>
+        ///<param name="amount">Сумма пополнения.</param>
+        public void Deposit(decimal amount)
+        {
+            CardBalance.AddCash(new CashBalance(amount));
+
+            var transaction = new Transaction(
+                this,
+                DateTime.UtcNow,
+                TransactionType.Deposit,
+                null,
+                new TransactionAmount(amount),
+                new TransactionFee(0),
+                TransactionStatus.Completed
+            );
+
+            AddCardTransaction(transaction);
+        }
+
+        ///<summary>
+        ///Снимает указанную сумму со счёта.
+        ///</summary>
+        ///<param name="amount">Сумма для снятия.</param>
+        public void Withdraw(decimal amount)
+        {
+            CardBalance.RemoveCash(new CashBalance(amount));
+
+            var transaction = new Transaction(
+                this,
+                DateTime.UtcNow,
+                TransactionType.Withdrawal,
+                null,
+                new TransactionAmount(amount),
+                new TransactionFee(0),
+                TransactionStatus.Completed
+            );
+
+            AddCardTransaction(transaction);
+        }
+
+        ///<summary>
+        ///Покупает актив и добавляет его в портфель.
+        ///</summary>
+        ///<param name="asset">Покупаемый актив.</param>
+        public void BuyAsset(Asset asset)
+        {
+            Portfolio.AddAsset(asset);
+
+            var amount = asset.PurchasePrice.Value * asset.Quantity.Value;
+            var transaction = new Transaction(
+                this,
+                DateTime.UtcNow,
+                TransactionType.Buy,
+                asset,
+                new TransactionAmount(amount),
+                new TransactionFee(1),
+                TransactionStatus.Completed
+            );
+
+            AddPortfolioTransaction(transaction);
+        }
+
+        ///<summary>
+        ///Продаёт актив по его идентификатору.
+        ///</summary>
+        ///<param name="assetId">Идентификатор актива.</param>
+        public void SellAsset(Guid assetId)
+        {
+            var asset = Portfolio.Assets.FirstOrDefault(a => a.Id == assetId);
+            if (asset is null)
+                throw new InvalidOperationException("Актив не найден.");
+
+            Portfolio.RemoveAsset(assetId);
+
+            var amount = asset.CurrentPrice.Value * asset.Quantity.Value;
+            var transaction = new Transaction(
+                this,
+                DateTime.UtcNow,
+                TransactionType.Sell,
+                asset,
+                new TransactionAmount(amount),
+                new TransactionFee(1),
+                TransactionStatus.Completed
+            );
+
+            AddPortfolioTransaction(transaction);
+        }
+
+        ///<summary>
+        ///Добавляет транзакцию вручную (используется брокером).
+        ///</summary>
+        ///<param name="transaction">Готовая транзакция.</param>
+        public void ExecuteTransaction(Transaction transaction)
+        {
+            if (transaction.Type is TransactionType.Deposit or TransactionType.Withdrawal or TransactionType.Fee)
+                AddCardTransaction(transaction);
+            else
+                AddPortfolioTransaction(transaction);
+        }
+
+        ///<summary>
+        ///Списывает фиксированную комиссию.
+        ///</summary>
+        ///<param name="feeAmount">Сумма комиссии.</param>
+        public void SettleFee(decimal feeAmount)
+        {
+            CardBalance.RemoveCash(new CashBalance(feeAmount));
+
+            var transaction = new Transaction(
+                this,
+                DateTime.UtcNow,
+                TransactionType.Fee,
+                null,
+                new TransactionAmount(feeAmount),
+                new TransactionFee(feeAmount),
+                TransactionStatus.Completed
+            );
+
+            AddCardTransaction(transaction);
+        }
+
+        ///<summary>
+        ///Рассчитывает и списывает комиссию по заданной ставке.
+        ///</summary>
+        ///<param name="baseAmount">Базовая сумма операции.</param>
+        ///<param name="rate">Процент комиссии.</param>
+        public void SettleCommission(decimal baseAmount, decimal rate)
+        {
+            var fee = baseAmount * rate;
+            SettleFee(fee);
+        }
+
+        ///<summary>
+        ///Возвращает текущий доступный баланс.
+        ///</summary>
+        ///<returns>Сумма денежных средств на счёте.</returns>
+        public decimal GetBalance()
+        {
+            return CardBalance.CashBalance.Value;
+        }
+
+        ///<summary>
+        ///Возвращает суммарную стоимость портфеля.
+        ///</summary>
+        ///<returns>Общая стоимость всех активов клиента.</returns>
+        public decimal GetPortfolioValue()
+        {
+            return Portfolio.TotalValue.Value;
+        }
+
+        ///<summary>
+        ///Возвращает объединённую историю всех транзакций.
+        ///</summary>
+        ///<returns>Список всех транзакций по счёту и активам.</returns>
+        public IReadOnlyCollection<Transaction> GetAllTransactions()
+        {
+            return _cardTransactions
+                .Concat(_portfolioTransactions)
+                .OrderByDescending(t => t.Date)
+                .ToList()
+                .AsReadOnly();
+        }
+
+        ///<summary>
+        ///Возвращает сумму всех комиссий, списанных со счёта.
+        ///</summary>
+        ///<returns>Суммарная комиссия.</returns>
+        public decimal GetTotalCommission()
+        {
+            return _cardTransactions
+                .Where(t => t.Type == TransactionType.Fee)
+                .Sum(t => t.Fee.Value);
+        }
+
+        ///<summary>
+        ///Добавляет транзакцию пополнения или снятия.
+        ///</summary>
+        ///<param name="transaction">Транзакция по счёту.</param>
         public void AddCardTransaction(Transaction transaction)
         {
             _cardTransactions.Add(transaction);
         }
 
+        ///<summary>
+        ///Добавляет транзакцию покупки или продажи.
+        ///</summary>
+        ///<param name="transaction">Транзакция по портфелю.</param>
         public void AddPortfolioTransaction(Transaction transaction)
         {
             _portfolioTransactions.Add(transaction);
         }
 
-        public void ChangeStatus(AccountStatus status)
+        ///<summary>
+        ///Возвращает историю транзакций по балансу.
+        ///</summary>
+        ///<returns>Список транзакций по карте.</returns>
+        public IReadOnlyCollection<Transaction> GetCardTransactions()
         {
-            Status = status;
+            return _cardTransactions.ToList().AsReadOnly();
         }
+
+        ///<summary>
+        ///Возвращает историю операций с активами.
+        ///</summary>
+        ///<returns>Список транзакций по портфелю.</returns>
+        public IReadOnlyCollection<Transaction> GetPortfolioTransactions()
+        {
+            return _portfolioTransactions.ToList().AsReadOnly();
+        }
+
         #endregion
+
+
+        #endregion
+
     }
 
 }
