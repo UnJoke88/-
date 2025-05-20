@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Exceptions;
 
 namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
 {
@@ -42,23 +43,49 @@ namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
 
         #region Методы
 
+        ///<summary>
+        ///Добавляет средства на доступный баланс.
+        ///</summary>
+        ///<param name="amount">Сумма пополнения.</param>
         public void AddCash(CashBalance amount)
         {
+            if (amount.Value < 0)
+                throw new NegativeCashAmountException(amount.Value);
+
             CashBalance = new CashBalance(CashBalance.Value + amount.Value);
         }
 
+        ///<summary>
+        ///Списывает средства с доступного баланса.
+        ///</summary>
+        ///<param name="amount">Сумма списания.</param>
         public void RemoveCash(CashBalance amount)
         {
+            if (amount.Value < 0)
+                throw new NegativeCashAmountException(amount.Value);
+
+            if (CashBalance.Value < amount.Value)
+                throw new InsufficientFundsException(amount.Value, CashBalance.Value);
+
             CashBalance = new CashBalance(CashBalance.Value - amount.Value);
         }
 
+        ///<summary>
+        ///Переводит средства во временно заблокированные (pending).
+        ///</summary>
+        ///<param name="amount">Сумма для блокировки.</param>
         public void MoveToPending(CashBalance amount)
         {
+            if (amount.Value < 0)
+                throw new NegativeCashAmountException(amount.Value);
+
+            if (CashBalance.Value < amount.Value)
+                throw new PendingExceedsBalanceException(amount.Value, CashBalance.Value);
+
             CashBalance = new CashBalance(CashBalance.Value - amount.Value);
-            PendingCash = new PendingCash(PendingCash.Value + amount.Value);
+            PendingCash = new CashBalance(PendingCash.Value + amount.Value);
         }
 
         #endregion
     }
-
 }

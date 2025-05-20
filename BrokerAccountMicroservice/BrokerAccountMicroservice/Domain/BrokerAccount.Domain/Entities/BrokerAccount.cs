@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Exceptions;
 
 namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
 {
@@ -71,6 +72,12 @@ namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
         ///<param name="amount">Сумма пополнения.</param>
         public void Deposit(decimal amount)
         {
+            if (Status != AccountStatus.Active)
+                throw new AccountNotActiveException(Id);
+
+            if (amount <= 0)
+                throw new NegativeCashAmountException(amount);
+
             CardBalance.AddCash(new CashBalance(amount));
 
             var transaction = new Transaction(
@@ -92,6 +99,15 @@ namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
         ///<param name="amount">Сумма для снятия.</param>
         public void Withdraw(decimal amount)
         {
+            if (Status != AccountStatus.Active)
+                throw new AccountNotActiveException(Id);
+
+            if (amount <= 0)
+                throw new NegativeCashAmountException(amount);
+
+            if (CardBalance.CashBalance.Value < amount)
+                throw new InsufficientFundsException(amount, CardBalance.CashBalance.Value);
+
             CardBalance.RemoveCash(new CashBalance(amount));
 
             var transaction = new Transaction(
@@ -113,9 +129,20 @@ namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
         ///<param name="asset">Покупаемый актив.</param>
         public void BuyAsset(Asset asset)
         {
-            Portfolio.AddAsset(asset);
+            if (Status != AccountStatus.Active)
+                throw new AccountNotActiveException(Id);
+
+            if (asset == null)
+                throw new ArgumentNullException(nameof(asset));
 
             var amount = asset.PurchasePrice.Value * asset.Quantity.Value;
+            if (CardBalance.CashBalance.Value < amount)
+                throw new InsufficientFundsException(amount, CardBalance.CashBalance.Value);
+
+            Portfolio.AddAsset(asset);
+
+            CardBalance.RemoveCash(new CashBalance(amount));
+
             var transaction = new Transaction(
                 this,
                 DateTime.UtcNow,
@@ -135,9 +162,12 @@ namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
         ///<param name="assetId">Идентификатор актива.</param>
         public void SellAsset(Guid assetId)
         {
+            if (Status != AccountStatus.Active)
+                throw new AccountNotActiveException(Id);
+
             var asset = Portfolio.Assets.FirstOrDefault(a => a.Id == assetId);
             if (asset is null)
-                throw new InvalidOperationException("Актив не найден.");
+                throw new AssetNotFoundException(assetId);
 
             Portfolio.RemoveAsset(assetId);
 
@@ -152,6 +182,7 @@ namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
                 TransactionStatus.Completed
             );
 
+            CardBalance.AddCash(new CashBalance(amount));
             AddPortfolioTransaction(transaction);
         }
 
@@ -195,6 +226,9 @@ namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
         ///<param name="rate">Процент комиссии.</param>
         public void SettleCommission(decimal baseAmount, decimal rate)
         {
+            if (rate < 0 || rate > 1)
+                throw new InvalidCommissionRateException(rate);
+
             var fee = baseAmount * rate;
             SettleFee(fee);
         }
@@ -277,11 +311,15 @@ namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
             return _portfolioTransactions.ToList().AsReadOnly();
         }
 
+        ///<summary>
+        ///Обновляет цену актива через портфель.
+        ///</summary>
+        ///<param name="assetId">Идентификатор актива.</param>
+        ///<param name="newPrice">Новая рыночная цена.</param>
+        public void UpdateAssetPrice(Guid assetId, CurrentPrice newPrice)
+        {
+            Portfolio.UpdateAssetPrice(assetId, newPrice);
+        }
         #endregion
-
-
-        #endregion
-
     }
-
 }

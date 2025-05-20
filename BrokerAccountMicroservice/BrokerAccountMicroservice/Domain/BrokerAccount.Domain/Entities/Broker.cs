@@ -1,4 +1,7 @@
 ﻿using BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities.Base;
+using BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Exceptions;
+using BrokerAccountMicroservice.Domain.BrokerAccount.Domain.ValueObjects;
+using BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,133 +10,120 @@ using System.Threading.Tasks;
 
 namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
 {
-    /// <summary>
-    /// Сущность "Клиент" — инвестор, владеющий брокерским счётом.
-    /// </summary>
-    public class Client : Entity<Guid>
+    ///<summary>
+    ///Сущность "Брокер" — юридическое лицо, управляющее брокерскими счетами клиентов.
+    ///</summary>
+    public class Broker : Entity<Guid>
     {
         #region Свойства
-        public FirstName FirstName { get; }
-        public LastName LastName { get; }
-        public MiddleName? MiddleName { get; }
-        public Email Email { get; }
-        public PhoneNumber PhoneNumber { get; }
-        public DateTime RegistrationDate { get; private set; }
-        public BrokerAccount Account { get; private set; }
+
+        public BrokerName Name { get; }
+        public LicenseNumber LicenseNumber { get; }
+        public decimal CommissionRate { get; private set; }
+        public decimal MinimalDeposit { get; }
+        public string? Description { get; }
+
+        private readonly List<BrokerAccount> _accounts = new();
+
+        public IReadOnlyCollection<BrokerAccount> Accounts => _accounts.AsReadOnly();
+
         #endregion
 
-        #region Основной конструктор
-        // Используется внутри и для создания через public-конструктор
-        protected Client(
+        #region Конструкторы
+
+        protected Broker(
             Guid id,
-            FirstName firstName,
-            LastName lastName,
-            MiddleName? middleName,
-            Email email,
-            PhoneNumber phoneNumber,
-            DateTime registrationDate
+            BrokerName name,
+            LicenseNumber licenseNumber,
+            decimal commissionRate,
+            decimal minimalDeposit,
+            string? description = null
         ) : base(id)
         {
-            FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
-            LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
-            MiddleName = middleName;
-            Email = email ?? throw new ArgumentNullException(nameof(email));
-            PhoneNumber = phoneNumber ?? throw new ArgumentNullException(nameof(phoneNumber));
-            RegistrationDate = registrationDate;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            LicenseNumber = licenseNumber ?? throw new ArgumentNullException(nameof(licenseNumber));
+
+            if (commissionRate < 0 || commissionRate > 1)
+                throw new InvalidCommissionRateException(commissionRate);
+
+            if (minimalDeposit < 0)
+                throw new NegativeCashAmountException(minimalDeposit);
+
+            CommissionRate = commissionRate;
+            MinimalDeposit = minimalDeposit;
+            Description = description;
         }
+
+        public Broker(
+            BrokerName name,
+            LicenseNumber licenseNumber,
+            decimal commissionRate,
+            decimal minimalDeposit,
+            string? description = null
+        ) : this(Guid.NewGuid(), name, licenseNumber, commissionRate, minimalDeposit, description)
+        {
+        }
+
+        protected Broker() : base(Guid.NewGuid())
+        {
+        }
+
         #endregion
 
-        #region Публичный конструктор
-        // Упрощённый вызов — Guid генерируется автоматически
-        public Client(
-            FirstName firstName,
-            LastName lastName,
-            MiddleName? middleName,
-            Email email,
-            PhoneNumber phoneNumber,
-            DateTime registrationDate
-        ) : this(Guid.NewGuid(), firstName, lastName, middleName, email, phoneNumber, registrationDate)
-        {
-        }
-        #endregion
-
-        #region Конструктор для ORM
-        // Используется Entity Framework при загрузке сущности из БД
-        protected Client() : base(Guid.NewGuid())
-        {
-        }
-        #endregion
-
-        #region Методы брокера
+        #region Методы
 
         ///<summary>
-        ///Выполняет транзакцию от имени клиента.
+        ///Привязывает счёт к брокеру.
         ///</summary>
-        ///<param name="account">Брокерский счёт клиента.</param>
-        ///<param name="transaction">Готовая транзакция.</param>
-        public void ExecuteTransaction(BrokerAccount account, Transaction transaction)
+        public void AddAccount(BrokerAccount account)
         {
-            account.ExecuteTransaction(transaction);
+            if (account == null)
+                throw new ArgumentNullException(nameof(account));
+
+            _accounts.Add(account);
         }
 
         ///<summary>
-        ///Списывает фиксированную комиссию с брокерского счёта клиента.
+        ///Возвращает все активные счета.
         ///</summary>
-        ///<param name="account">Брокерский счёт клиента.</param>
-        ///<param name="feeAmount">Сумма комиссии.</param>
-        public void ChargeFee(BrokerAccount account, decimal feeAmount)
+        public IReadOnlyCollection<BrokerAccount> GetActiveAccounts()
         {
-            account.SettleFee(feeAmount);
+            return _accounts.Where(a => a.Status == AccountStatus.Active).ToList().AsReadOnly();
         }
 
         ///<summary>
-        ///Рассчитывает комиссию по ставке брокера и списывает её со счёта клиента.
+        ///Фильтрует счета по статусу.
         ///</summary>
-        ///<param name="account">Брокерский счёт клиента.</param>
-        ///<param name="baseAmount">Сумма, с которой рассчитывается комиссия.</param>
-        public void ChargeCommission(BrokerAccount account, decimal baseAmount)
-        {
-            account.SettleCommission(baseAmount, CommissionRate);
-        }
-
-        ///<summary>
-        ///Возвращает текущую стоимость портфеля клиента.
-        ///</summary>
-        ///<param name="account">Брокерский счёт клиента.</param>
-        ///<returns>Суммарная стоимость активов.</returns>
-        public decimal GetPortfolioValue(BrokerAccount account)
-        {
-            return account.GetPortfolioValue();
-        }
-
-        ///<summary>
-        ///Возвращает объединённую историю всех транзакций клиента.
-        ///</summary>
-        ///<param name="account">Брокерский счёт клиента.</param>
-        ///<returns>История транзакций по счёту и портфелю.</returns>
-        public IReadOnlyCollection<Transaction> GetAllTransactions(BrokerAccount account)
-        {
-            return account.GetAllTransactions();
-        }
-
-        ///<summary>
-        ///Фильтрует счета по заданному статусу.
-        ///</summary>
-        ///<param name="status">Статус счёта (Active, Closed и т.д.).</param>
-        ///<returns>Список подходящих счетов.</returns>
         public IReadOnlyCollection<BrokerAccount> GetAccountsByStatus(AccountStatus status)
         {
             return _accounts.Where(a => a.Status == status).ToList().AsReadOnly();
         }
 
         ///<summary>
-        ///Возвращает общую сумму комиссий, списанных со счёта клиента.
+        ///Возвращает общую стоимость всех портфелей клиентов.
         ///</summary>
-        ///<param name="account">Брокерский счёт клиента.</param>
-        ///<returns>Сумма всех комиссий.</returns>
-        public decimal GetTotalCommissionCharged(BrokerAccount account)
+        public decimal GetTotalPortfolioValue()
         {
-            return account.GetTotalCommission();
+            return _accounts.Sum(a => a.GetPortfolioValue());
+        }
+
+        ///<summary>
+        ///Возвращает общую сумму всех комиссий.
+        ///</summary>
+        public decimal GetTotalCommissionCharged()
+        {
+            return _accounts.Sum(a => a.GetTotalCommission());
+        }
+
+        ///<summary>
+        ///Изменяет ставку комиссии брокера.
+        ///</summary>
+        public void UpdateCommissionRate(decimal newRate)
+        {
+            if (newRate < 0 || newRate > 1)
+                throw new InvalidCommissionRateException(newRate);
+
+            CommissionRate = newRate;
         }
 
         #endregion

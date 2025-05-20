@@ -1,4 +1,5 @@
 ﻿using BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities.Base;
+using BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Exceptions.Asset;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,19 +67,58 @@ namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
 
         #region Методы
 
-        public void UpdateCurrentPrice(CurrentPrice newPrice)
+        ///<summary>
+        ///Обновляет текущую рыночную цену актива.
+        ///</summary>
+        ///<param name="newPrice">Новая цена.</param>
+        public void UpdatePrice(CurrentPrice newPrice)
         {
+            if (newPrice == null || newPrice.Value < 0)
+                throw new AssetPriceBelowZeroException(newPrice?.Value ?? 0);
+
             CurrentPrice = newPrice;
         }
 
+        ///<summary>
+        ///Обновляет цену покупки.
+        ///</summary>
+        ///<param name="newPrice">Цена покупки при сделке.</param>
         public void UpdatePurchasePrice(PurchasePrice newPrice)
         {
+            if (newPrice == null || newPrice.Value < 0)
+                throw new AssetPriceBelowZeroException(newPrice?.Value ?? 0);
+
             PurchasePrice = newPrice;
         }
 
+        ///<summary>
+        ///Устанавливает новое количество актива.
+        ///</summary>
+        ///<param name="newQuantity">Обновлённое количество.</param>
         public void ChangeQuantity(AssetQuantity newQuantity)
         {
+            if (newQuantity == null || newQuantity.Value <= 0)
+                throw new AssetQuantityOutOfRangeException(newQuantity?.Value ?? 0);
+
             Quantity = newQuantity;
+        }
+
+        ///<summary>
+        ///Рассчитывает текущую стоимость актива.
+        ///</summary>
+        ///<returns>Произведение количества на текущую цену.</returns>
+        public decimal GetTotalValue()
+        {
+            return CurrentPrice.Value * Quantity.Value;
+        }
+
+        ///<summary>
+        ///Возвращает строковое описание актива.
+        ///</summary>
+        ///<returns>Например: "AAPL (Stock) × 5".</returns>
+        public string GetAssetDetails()
+        {
+            return $"{Symbol.Value} ({Type}) × {Quantity.Value}";
         }
 
         #endregion

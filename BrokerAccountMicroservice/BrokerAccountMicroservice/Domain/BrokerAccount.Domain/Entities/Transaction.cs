@@ -5,8 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Enums;
-
-
+using BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Exceptions.Transaction;
 
 namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
 {
@@ -41,6 +40,13 @@ namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
         ) : base(id)
         {
             Account = account ?? throw new ArgumentNullException(nameof(account));
+
+            if (amount == null || amount.Value <= 0)
+                throw new InvalidTransactionAmountException(amount?.Value ?? 0);
+
+            if (date > DateTime.UtcNow)
+                throw new InvalidTransactionDateException(date);
+
             Date = date;
             Type = type;
             Asset = asset;
@@ -69,32 +75,67 @@ namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
 
         #region Методы
 
+        ///<summary>
+        ///Завершает транзакцию, если она ещё не завершена.
+        ///</summary>
         public void Complete()
         {
+            if (Status == TransactionStatus.Completed)
+                throw new CompletedTransactionModificationException(Id);
+
             Status = TransactionStatus.Completed;
         }
 
+        ///<summary>
+        ///Помечает транзакцию как неуспешную.
+        ///</summary>
         public void Fail()
         {
+            if (Status == TransactionStatus.Failed)
+                throw new FailedTransactionModificationException(Id);
+
             Status = TransactionStatus.Failed;
         }
 
-        public void UpdateDate(DateTime date)
+        ///<summary>
+        ///Обновляет сумму транзакции.
+        ///</summary>
+        ///<param name="newAmount">Новая сумма.</param>
+        public void UpdateAmount(TransactionAmount newAmount)
         {
-            Date = date;
+            if (Status == TransactionStatus.Completed)
+                throw new CompletedTransactionModificationException(Id);
+
+            if (newAmount == null || newAmount.Value <= 0)
+                throw new InvalidTransactionAmountException(newAmount?.Value ?? 0);
+
+            Amount = newAmount;
         }
 
-        public void UpdateAmount(TransactionAmount amount)
+        ///<summary>
+        ///Обновляет комиссию для транзакции.
+        ///</summary>
+        ///<param name="newFee">Новая комиссия.</param>
+        public void UpdateFee(TransactionFee newFee)
         {
-            Amount = amount;
+            if (Status == TransactionStatus.Completed)
+                throw new CompletedTransactionModificationException(Id);
+
+            Fee = newFee;
         }
 
-        public void UpdateFee(TransactionFee fee)
+        ///<summary>
+        ///Обновляет дату транзакции.
+        ///</summary>
+        ///<param name="newDate">Новая дата.</param>
+        public void UpdateDate(DateTime newDate)
         {
-            Fee = fee;
+            if (newDate > DateTime.UtcNow)
+                throw new InvalidTransactionDateException(newDate);
+
+            Date = newDate;
         }
 
         #endregion
     }
 }
-
