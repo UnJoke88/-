@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 /// <summary>
 /// Статус брокерского счёта
 /// </summary>
-namespace BrokerAccountMicroservice.Domain.BrokerAccount.Enums
+namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Enums
 {
     public enum AccountStatus
     {

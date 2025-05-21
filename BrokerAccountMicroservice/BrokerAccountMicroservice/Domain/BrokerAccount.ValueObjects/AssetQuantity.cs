@@ -1,16 +1,18 @@
-﻿using BrokerAccountMicroservice.Domain.BrokerAccount.ValueObjects.Base;
-using BrokerAccountMicroservice.Domain.BrokerAccount.ValueObjects.Validators;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BrokerAccount.ValueObjects.Exceptions;
 
-//Объект-значение для количества актива. Хранит int и проверяет, что значение неотрицательное.
-namespace BrokerAccountMicroservice.Domain.BrokerAccount.ValueObjects
+namespace BrokerAccountMicroservice.Domain.BrokerAccount.ValueObjects.Validators
 {
-    public readonly record struct AssetQuantity : ValueObject<int>
+    public class AssetQuantityValidator : IValidator<int>
     {
-        public AssetQuantity(int value) : base(new AssetQuantityValidator(), value) { }
+        public void Validate(int value)
+        {
+            if (value <= 0)
+                throw new AssetQuantityOutOfRangeException(nameof(value), value);
+        }
     }
 }

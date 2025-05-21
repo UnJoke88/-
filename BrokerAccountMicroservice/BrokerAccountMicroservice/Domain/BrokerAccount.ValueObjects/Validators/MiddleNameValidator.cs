@@ -1,27 +1,37 @@
-﻿using BrokerAccountMicroservice.Domain.BrokerAccount.ValueObjects.Base;
-using BrokerAccountMicroservice.Domain.BrokerAccount.Exceptions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using BrokerAccount.ValueObjects.Exceptions;
 
 namespace BrokerAccountMicroservice.Domain.BrokerAccount.ValueObjects.Validators
 {
+    ///<summary>
+    ///Валидатор отчества. Проверяет длину и допустимые символы, если значение указано.
+    ///</summary>
     public class MiddleNameValidator : IValidator<string?>
     {
-        public static int MAX_LENGTH => 50;
+        private const int MaxLength = 50;
+        private static readonly Regex ValidCharacters = new(@"^[a-zA-Zа-яА-ЯёЁ\-]+$");
 
+        ///<summary>
+        ///Проверяет корректность отчества.
+        ///</summary>
+        ///<param name="value">Отчество пользователя (может быть null).</param>
+        ///<exception cref="MiddleNameTooLongException">Если значение превышает длину.</exception>
+        ///<exception cref="MiddleNameInvalidCharactersException">Если содержит недопустимые символы.</exception>
         public void Validate(string? value)
         {
             if (string.IsNullOrWhiteSpace(value))
-                return; // Отчество может быть пустым
+                return;
 
-            if (value.Length > MAX_LENGTH)
-                throw new DomainValidationException($"Отчество слишком длинное. Максимум {MAX_LENGTH} символов.");
+            if (value.Length > MaxLength)
+                throw new MiddleNameTooLongException(nameof(value), value);
 
-            if (value.Any(c => !char.IsLetter(c)))
-                throw new DomainValidationException("Отчество может содержать только буквы");
+            if (!ValidCharacters.IsMatch(value))
+                throw new MiddleNameInvalidCharactersException(nameof(value), value);
         }
     }
 }

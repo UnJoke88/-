@@ -1,16 +1,31 @@
-﻿using BrokerAccountMicroservice.Domain.BrokerAccount.ValueObjects.Base;
-using BrokerAccountMicroservice.Domain.BrokerAccount.ValueObjects.Validators;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using BrokerAccountMicroservice.Domain.BrokerAccount.ValueObjects.Base;
+using BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Enums;
+using BrokerAccount.ValueObjects.Exceptions;
 
-//Объект-значение для валюты. Хранит строку и проверяет, что это поддерживаемый ISO-код.
 namespace BrokerAccountMicroservice.Domain.BrokerAccount.ValueObjects
 {
-    public readonly record struct Currency : ValueObject<string>
+    ///<summary>
+    ///ValueObject, представляющий валюту.
+    ///</summary>
+    public class Currency : ValueObject<CurrencyEnum>
     {
-        public Currency(string value) : base(new CurrencyValidator(), value) { }
+        public Currency(CurrencyEnum value) : base(value) { }
+
+        ///<summary>
+        ///Создаёт валюту из строки.
+        ///</summary>
+        ///<param name="value">Строка валюты.</param>
+        ///<returns>Объект Currency.</returns>
+        ///<exception cref="InvalidCurrencyException">Если значение не входит в enum.</exception>
+        public static Currency FromString(string value)
+        {
+            if (!Enum.TryParse<CurrencyEnum>(value, true, out var parsed))
+                throw new InvalidCurrencyException(nameof(value), value);
+
+            return new Currency(parsed);
+        }
+
+        public override string ToString() => Value.ToString();
     }
 }

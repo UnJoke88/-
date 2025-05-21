@@ -1,23 +1,33 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using BrokerAccount.ValueObjects.Exceptions;
 
 namespace BrokerAccountMicroservice.Domain.BrokerAccount.ValueObjects.Validators
 {
+    ///<summary>
+    ///Валидатор номера лицензии. Проверяет, что значение не пустое и соответствует формату.
+    ///</summary>
     public class LicenseNumberValidator : IValidator<string>
     {
-        // Проверяет, что номер лицензии содержит только буквы/цифры, длина 5-20 символов
-        private static readonly Regex _licensePattern = new(@"^[a-zA-Z0-9]{5,20}$", RegexOptions.Compiled);
+        private static readonly Regex Format = new(@"^[A-Z0-9\-]{6,20}$");
 
+        ///<summary>
+        ///Проверяет номер лицензии.
+        ///</summary>
+        ///<param name="value">Значение лицензии.</param>
+        ///<exception cref="LicenseNumberEmptyException">Если значение пустое.</exception>
+        ///<exception cref="LicenseNumberInvalidFormatException">Если не соответствует допустимому шаблону.</exception>
         public void Validate(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
-                throw new DomainValidationException("Номер лицензии не может быть пустым");
+                throw new LicenseNumberEmptyException(nameof(value), value);
 
-            if (!_licensePattern.IsMatch(value))
-                throw new DomainValidationException("Номер лицензии должен содержать только латинские буквы и цифры (5–20 символов)");
+            if (!Format.IsMatch(value))
+                throw new LicenseNumberInvalidFormatException(nameof(value), value);
         }
     }
 }

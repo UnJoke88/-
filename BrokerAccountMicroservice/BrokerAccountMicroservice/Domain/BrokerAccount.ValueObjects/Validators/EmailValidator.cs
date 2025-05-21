@@ -1,26 +1,35 @@
-﻿using BrokerAccountMicroservice.Domain.BrokerAccount.ValueObjects.Base;
-using BrokerAccountMicroservice.Domain.BrokerAccount.Exceptions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Net.Mail;
+using BrokerAccount.ValueObjects.Exceptions;
 
 namespace BrokerAccountMicroservice.Domain.BrokerAccount.ValueObjects.Validators
 {
+    ///<summary>
+    ///Валидатор email-адреса. Проверяет корректность формата.
+    ///</summary>
     public class EmailValidator : IValidator<string>
     {
-        //Проверяет, что строка выглядит как email: что-то@что-то.что-то 
-        private static readonly Regex _emailPattern = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
-
+        ///<summary>
+        ///Проверяет формат email.
+        ///</summary>
+        ///<param name="value">Значение email.</param>
+        ///<exception cref="EmailFormatException">Если email некорректного формата.</exception>
         public void Validate(string value)
         {
-            if (string.IsNullOrWhiteSpace(value))
-                throw new DomainValidationException("Email не может быть пустым");
-
-            if (!_emailPattern.IsMatch(value))
-                throw new DomainValidationException("Неверный формат email-адреса");
+            try
+            {
+                var address = new MailAddress(value);
+                if (address.Address != value)
+                    throw new EmailFormatException(nameof(value), value);
+            }
+            catch
+            {
+                throw new EmailFormatException(nameof(value), value);
+            }
         }
     }
 }
