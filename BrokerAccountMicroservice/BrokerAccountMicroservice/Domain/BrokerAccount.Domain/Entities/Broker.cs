@@ -125,7 +125,6 @@ namespace BrokerAccountMicroservice.Domain.BrokerAccount.Domain.Entities
 
             CommissionRate = newRate;
         }
-
         #endregion
     }
 }
