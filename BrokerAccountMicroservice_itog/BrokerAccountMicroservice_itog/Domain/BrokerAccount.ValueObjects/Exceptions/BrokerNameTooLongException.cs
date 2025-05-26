@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exceptions
 {
     ///<summary>
-    ///Исключение, возникающее при слишком длинном имени брокера.
+    /// Проверка длины имени брокера (слишком длинное значение).
     ///</summary>
-    ///<param name="paramName">Имя параметра.</param>
-    ///<param name="name">Слишком длинное имя.</param>
-    internal class BrokerNameTooLongException(string paramName, string name)
-        : FormatException($"Имя брокера превышает допустимую длину: \"{name}\".", paramName)
+    internal class BrokerNameTooLongException(string name, int maxLength)
+        : ArgumentException($"Название брокера превышает максимально допустимую длину в {maxLength} символов: \"{name}\".", nameof(name))
     {
         public string Name => name;
+        public int MaxLength => maxLength;
     }
 }
+

@@ -9,8 +9,12 @@ using System.Threading.Tasks;
 //Объект-значение для фамилии клиента. Хранит строку и проверяет её через валидатор.
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects
 {
-    public class LastName : ValueObject<string>
-    {
-        public LastName(string value) : base(new LastNameValidator(), value) { }
+    /// <summary>
+    /// Представляет фамилию клиента.
+    /// </summary>
+    public class LastName(string value)
+        : ValueObject<string>(new LastNameValidator(), value)
+    { 
+
     }
 }

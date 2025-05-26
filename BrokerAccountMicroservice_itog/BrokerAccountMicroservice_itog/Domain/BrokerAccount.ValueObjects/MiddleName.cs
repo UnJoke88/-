@@ -9,8 +9,12 @@ using System.Threading.Tasks;
 //Объект-значение для отчества клиента. Хранит строку и проверяет её при наличии.
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects
 {
-    public class MiddleName : ValueObject<string?>
+    /// <summary>
+    /// Представляет отчество клиента (может отсутствовать).
+    /// </summary>
+    public class MiddleName(string? value)
+        : ValueObject<string?>(new MiddleNameValidator(), value)
     {
-        public MiddleName(string? value) : base(new MiddleNameValidator(), value) { }
+    
     }
 }

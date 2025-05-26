@@ -1,4 +1,5 @@
-﻿using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Base;
+﻿using AuctionTrading.Domain.ValueObjects.Exceptions;
+using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Base;
 using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -10,36 +11,21 @@ using System.Threading.Tasks;
 
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Validators
 {
-    ///<summary>
-    ///Валидатор фамилии. Проверяет наличие, длину и допустимые символы.
-    ///</summary>
     public class LastNameValidator : IValidator<string>
     {
-        private const int MinLength = 2;
-        private const int MaxLength = 50;
-        private static readonly Regex ValidCharacters = new(@"^[a-zA-Zа-яА-ЯёЁ\-]+$");
+        public static int MAX_LENGTH => 55;
+        public static int MIN_LENGTH => 2;
 
-        ///<summary>
-        ///Выполняет валидацию фамилии.
-        ///</summary>
-        ///<param name="value">Фамилия пользователя.</param>
-        ///<exception cref="LastNameEmptyException">Если значение пустое.</exception>
-        ///<exception cref="LastNameTooShortException">Если фамилия слишком короткая.</exception>
-        ///<exception cref="LastNameTooLongException">Если фамилия слишком длинная.</exception>
-        ///<exception cref="LastNameInvalidCharactersException">Если содержит недопустимые символы.</exception>
         public void Validate(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
-                throw new LastNameEmptyException(nameof(value), value);
+                throw new ArgumentNullOrWhiteSpaceException(ExceptionMessages.LASTNAME_NOT_NULL_OR_WHITE_SPACE, nameof(value));
 
-            if (value.Length < MinLength)
-                throw new LastNameTooShortException(nameof(value), value);
+            if (value.Length > MAX_LENGTH)
+                throw new LastNameTooLongException(value, MAX_LENGTH);
 
-            if (value.Length > MaxLength)
-                throw new LastNameTooLongException(nameof(value), value);
-
-            if (!ValidCharacters.IsMatch(value))
-                throw new LastNameInvalidCharactersException(nameof(value), value);
+            if (value.Length < MIN_LENGTH)
+                throw new LastNameTooShortException(value, MIN_LENGTH);
         }
     }
 }

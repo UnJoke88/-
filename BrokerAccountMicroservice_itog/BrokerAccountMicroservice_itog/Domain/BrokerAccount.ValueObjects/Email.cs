@@ -10,8 +10,12 @@ using System.Threading.Tasks;
 //Объект-значение для email-адреса клиента. Хранит строку и проверяет формат.
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects
 {
-    public class Email : ValueObject<string>
-    {
-        public Email(string value) : base(new EmailValidator(), value) { }
+    /// <summary>
+    /// Email-адрес клиента.
+    /// </summary>
+    public class Email(string value)
+        : ValueObject<string>(new EmailValidator(), value)
+    { 
+    
     }
 }

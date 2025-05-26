@@ -10,30 +10,17 @@ using System.Threading.Tasks;
 
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Validators
 {
-    ///<summary>
-    ///Валидатор отчества. Проверяет длину и допустимые символы, если значение указано.
-    ///</summary>
     public class MiddleNameValidator : IValidator<string?>
     {
-        private const int MaxLength = 50;
-        private static readonly Regex ValidCharacters = new(@"^[a-zA-Zа-яА-ЯёЁ\-]+$");
+        public static int MAX_LENGTH => 55;
 
-        ///<summary>
-        ///Проверяет корректность отчества.
-        ///</summary>
-        ///<param name="value">Отчество пользователя (может быть null).</param>
-        ///<exception cref="MiddleNameTooLongException">Если значение превышает длину.</exception>
-        ///<exception cref="MiddleNameInvalidCharactersException">Если содержит недопустимые символы.</exception>
         public void Validate(string? value)
         {
-            if (string.IsNullOrWhiteSpace(value))
+            if (value is null)
                 return;
 
-            if (value.Length > MaxLength)
-                throw new MiddleNameTooLongException(nameof(value), value);
-
-            if (!ValidCharacters.IsMatch(value))
-                throw new MiddleNameInvalidCharactersException(nameof(value), value);
+            if (value.Length > MAX_LENGTH)
+                throw new MiddleNameTooLongException(value, MAX_LENGTH);
         }
     }
 }

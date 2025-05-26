@@ -6,14 +6,10 @@ using System.Threading.Tasks;
 
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exceptions
 {
-    ///<summary>
-    ///Исключение, возникающее при слишком длинной фамилии.
-    ///</summary>
-    ///<param name="paramName">Имя параметра.</param>
-    ///<param name="name">Слишком длинная фамилия.</param>
-    internal class LastNameTooLongException(string paramName, string name)
-        : ArgumentException($"Фамилия превышает допустимую длину: \"{name}\".", paramName)
+    internal class LastNameTooLongException(string lastName, int maxLength)
+          : FormatException($"Last name length {lastName} greated than maximum allowed(допустимая длина) length {maxLength}") // FormatException. Исключение, которое возникает в случае, если формат аргумента недопустим или строка составного формата построена неправильно.  Наследование Object ==> Exception ==> SystemException ==> FormatException
     {
-        public string Name => name;
+        public string LastName => lastName;
+        public int MaxLength => maxLength;
     }
 }

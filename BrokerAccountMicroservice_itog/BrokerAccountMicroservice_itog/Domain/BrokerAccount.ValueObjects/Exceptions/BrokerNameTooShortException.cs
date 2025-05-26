@@ -7,13 +7,12 @@ using System.Threading.Tasks;
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exceptions
 {
     ///<summary>
-    ///Исключение, возникающее при слишком коротком имени брокера.
+    /// Проверка длины имени брокера (слишком короткое значение).
     ///</summary>
-    ///<param name="paramName">Имя параметра.</param>
-    ///<param name="name">Слишком короткое имя.</param>
-    internal class BrokerNameTooShortException(string paramName, string name)
-        : FormatException($"Имя брокера слишком короткое: \"{name}\".", paramName)
+    internal class BrokerNameTooShortException(string name, int minLength)
+        : ArgumentException($"Название брокера слишком короткое (минимум {minLength} символа): \"{name}\".", nameof(name))
     {
         public string Name => name;
+        public int MinLength => minLength;
     }
 }

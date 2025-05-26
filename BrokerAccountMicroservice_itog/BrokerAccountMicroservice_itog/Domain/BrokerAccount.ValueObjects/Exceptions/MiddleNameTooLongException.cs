@@ -7,13 +7,12 @@ using System.Threading.Tasks;
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exceptions
 {
     ///<summary>
-    ///Исключение, возникающее при слишком длинном отчестве.
+    /// Проверка длины отчества.
     ///</summary>
-    ///<param name="paramName">Имя параметра.</param>
-    ///<param name="name">Слишком длинное отчество.</param>
-    internal class MiddleNameTooLongException(string paramName, string name)
-        : ArgumentException($"Отчество превышает допустимую длину: \"{name}\".", paramName)
+    internal class MiddleNameTooLongException(string name, int maxLength)
+        : ArgumentException($"Отчество превышает допустимую длину в {maxLength} символов: \"{name}\".", nameof(name))
     {
         public string Name => name;
+        public int MaxLength => maxLength;
     }
 }

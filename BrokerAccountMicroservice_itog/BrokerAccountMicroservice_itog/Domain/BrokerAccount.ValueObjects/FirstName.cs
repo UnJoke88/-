@@ -9,8 +9,11 @@ using System.Threading.Tasks;
 //Объект-значение для имени клиента. Хранит строку и проверяет её через валидатор.
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects
 {
-    public class FirstName : ValueObject<string>
-    {
-        public FirstName(string value) : base(new FirstNameValidator(), value) { }
-    }
+    /// <summary>
+    /// Представляет тип имени сущности (покупателя, администратора и т. д.).
+    /// </summary>
+    /// <param name="name">Имя сущности.</param>
+    public class FirstName(string name) 
+        : ValueObject<string>(new FirstNameValidator(), name); // Наследование от базовой сущности. При создании объекта класса, проверяем(валидируем) его 
+
 }

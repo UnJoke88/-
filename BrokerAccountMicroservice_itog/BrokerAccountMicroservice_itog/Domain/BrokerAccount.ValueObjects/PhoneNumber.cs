@@ -9,8 +9,12 @@ using System.Threading.Tasks;
 //Объект-значение для номера телефона клиента. Хранит строку и проверяет формат.
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects
 {
-    public class PhoneNumber : ValueObject<string>
+    /// <summary>
+    /// Номер телефона клиента.
+    /// </summary>
+    public class PhoneNumber(string value)
+        : ValueObject<string>(new PhoneNumberValidator(), value)
     {
-        public PhoneNumber(string value) : base(new PhoneNumberValidator(), value) { }
+    
     }
 }

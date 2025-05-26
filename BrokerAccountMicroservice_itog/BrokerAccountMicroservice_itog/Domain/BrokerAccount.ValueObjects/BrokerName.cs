@@ -9,8 +9,12 @@ using System.Threading.Tasks;
 //Объект-значение для названия брокерской компании. Хранит строку и проверяет длину.
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects
 {
-    public class BrokerName : ValueObject<string>
-    {
-        public BrokerName(string value) : base(new BrokerNameValidator(), value) { }
+    /// <summary>
+    /// Название брокерской компании.
+    /// </summary>
+    public class BrokerName(string value)
+        : ValueObject<string>(new BrokerNameValidator(), value)
+    { 
+    
     }
 }

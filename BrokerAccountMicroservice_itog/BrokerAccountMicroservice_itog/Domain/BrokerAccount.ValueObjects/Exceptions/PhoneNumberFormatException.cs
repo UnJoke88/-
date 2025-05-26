@@ -7,12 +7,10 @@ using System.Threading.Tasks;
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exceptions
 {
     ///<summary>
-    ///Исключение, возникающее при недопустимом формате номера телефона.
+    /// Проверка допустимости символов номера телефона.
     ///</summary>
-    ///<param name="paramName">Имя параметра.</param>
-    ///<param name="phone">Недопустимый номер телефона.</param>
-    internal class PhoneNumberFormatException(string paramName, string phone)
-        : ArgumentException($"Номер телефона имеет недопустимый формат: \"{phone}\".", paramName)
+    internal class PhoneNumberFormatException(string phone)
+        : ArgumentException($"Номер телефона имеет недопустимый формат: \"{phone}\".", nameof(phone))
     {
         public string Phone => phone;
     }

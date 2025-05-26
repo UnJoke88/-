@@ -1,4 +1,5 @@
-﻿using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Base;
+﻿using AuctionTrading.Domain.ValueObjects.Exceptions;
+using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Base;
 using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -10,36 +11,32 @@ using System.Threading.Tasks;
 
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Validators
 {
-    ///<summary>
-    ///Валидатор имени. Проверяет наличие, длину и символы имени.
-    ///</summary>
     public class FirstNameValidator : IValidator<string>
     {
-        private const int MinLength = 2;
-        private const int MaxLength = 50;
-        private static readonly Regex ValidCharacters = new(@"^[a-zA-Zа-яА-ЯёЁ\-]+$");
+        /// <summary>
+        /// Максимальная длина имени
+        /// </summary>
+        public static int MAX_LENGTH => 55;
+        /// <summary>
+        /// Минимальная длина имени
+        /// </summary>
+        public static int MIN_LENGTH => 2;
 
-        ///<summary>
-        ///Выполняет валидацию имени.
-        ///</summary>
-        ///<param name="value">Имя пользователя.</param>
-        ///<exception cref="FirstNameEmptyException">Если имя пустое.</exception>
-        ///<exception cref="FirstNameTooShortException">Если имя слишком короткое.</exception>
-        ///<exception cref="FirstNameTooLongException">Если имя слишком длинное.</exception>
-        ///<exception cref="FirstNameInvalidCharactersException">Если имя содержит недопустимые символы.</exception>
+        /// <summary>
+        /// Проверяет строку, чтобы убедиться, что она не является нулевой, пустой и не состоит только из пробелов.
+        /// </summary>
+        /// <param name="value">Строка, в которой находятся данные.</param>
+        /// <exception cref="ArgumentNullOrWhiteSpaceException">Исключение, которое создаётся если, строка нулевая или состоит из пробелов.</exception>
+        /// <exception cref="FirstNameLongValueException">Исключение, которое создаётся, если длина имени больше допустимой длины.</exception>
+        /// <exception cref="FirstNameShortValueException">Исключение, которое создаётся, если длина имени меньше допустимой длины.</exception>
         public void Validate(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
-                throw new FirstNameEmptyException(nameof(value), value);
-
-            if (value.Length < MinLength)
-                throw new FirstNameTooShortException(nameof(value), value);
-
-            if (value.Length > MaxLength)
-                throw new FirstNameTooLongException(nameof(value), value);
-
-            if (!ValidCharacters.IsMatch(value))
-                throw new FirstNameInvalidCharactersException(nameof(value), value);
+                throw new ArgumentNullOrWhiteSpaceException(ExceptionMessages.FIRSTNAME_NOT_NULL_OR_WHITE_SPACE, nameof(value)); // С помощью ключевого слова typeof мы получаем тип класса
+            if (value.Length > MAX_LENGTH)
+                throw new FirstNameLongValueException(value, MAX_LENGTH);
+            if (value.Length < MIN_LENGTH)
+                throw new FirstNameShortValueException(value, MIN_LENGTH);
         }
     }
 }

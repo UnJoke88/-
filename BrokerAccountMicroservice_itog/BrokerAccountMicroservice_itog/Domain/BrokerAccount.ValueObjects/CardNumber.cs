@@ -8,15 +8,13 @@ using System.Threading.Tasks;
 
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects
 {
-    ///<summary>
-    ///Объект-значение для номера карты клиента. Хранит строку и проверяет формат.
-    ///</summary>
-    public class CardNumber : ValueObject<string>
+    /// <summary>
+    /// Номер карты клиента.
+    /// </summary>
+    public class CardNumber(string value)
+        : ValueObject<string>(new CardNumberValidator(), value)
     {
-        public CardNumber(string value) : base(new CardNumberValidator(), value) 
-        {
-        
-        }
+    
     }
 }
 

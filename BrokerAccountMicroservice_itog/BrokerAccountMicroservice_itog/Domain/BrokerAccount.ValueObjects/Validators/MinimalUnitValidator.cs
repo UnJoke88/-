@@ -8,20 +8,12 @@ using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exception
 
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Validators
 {
-    ///<summary>
-    ///Валидатор минимальной единицы актива. Проверяет, что значение положительное.
-    ///</summary>
-    public class MinimalUnitValidator : IValidator<decimal>
+    public class MinimalUnitValidator : IValidator<int>
     {
-        ///<summary>
-        ///Проверяет корректность минимальной единицы.
-        ///</summary>
-        ///<param name="value">Значение минимальной единицы.</param>
-        ///<exception cref="InvalidMinimalUnitException">Если значение не положительное.</exception>
-        public void Validate(decimal value)
+        public void Validate(int value)
         {
-            if (value <= 0)
-                throw new InvalidMinimalUnitException(nameof(value), value);
+            if (value < 1)
+                throw new MinimalUnitOutOfRangeException(value);
         }
     }
 }

@@ -9,8 +9,12 @@ using System.Threading.Tasks;
 //Объект-значение для минимальной единицы покупки. Хранит decimal и проверяет, что значение > 0 и <= 1.
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects
 {
-    public class MinimalUnit : ValueObject<decimal>
+    /// <summary>
+    /// Минимальная единица покупки актива.
+    /// </summary>
+    public class MinimalUnit(int value)
+        : ValueObject<int>(new MinimalUnitValidator(), value)
     {
-        public MinimalUnit(decimal value) : base(new MinimalUnitValidator(), value) { }
+    
     }
 }

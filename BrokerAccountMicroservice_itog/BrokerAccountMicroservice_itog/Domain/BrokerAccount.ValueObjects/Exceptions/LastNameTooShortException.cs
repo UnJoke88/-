@@ -6,14 +6,10 @@ using System.Threading.Tasks;
 
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exceptions
 {
-    ///<summary>
-    ///Исключение, возникающее при слишком короткой фамилии.
-    ///</summary>
-    ///<param name="paramName">Имя параметра.</param>
-    ///<param name="name">Слишком короткая фамилия.</param>
-    internal class LastNameTooShortException(string paramName, string name)
-        : ArgumentException($"Фамилия слишком короткая: \"{name}\".", paramName)
+    internal class LastNameTooShortException(string lastName, int minLength)
+            : FormatException($"Last name length {lastName} less than minimum allowed(допустимая длина) length {minLength}") // FormatException. Исключение, которое возникает в случае, если формат аргумента недопустим или строка составного формата построена неправильно.  Наследование Object ==> Exception ==> SystemException ==> FormatException
     {
-        public string Name => name;
+        public string LastName => lastName;
+        public int MinLength => minLength;
     }
 }
