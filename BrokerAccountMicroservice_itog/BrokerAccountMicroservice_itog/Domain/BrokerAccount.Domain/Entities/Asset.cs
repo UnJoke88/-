@@ -1,5 +1,6 @@
 ﻿using BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities.Base;
 using BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Enums;
+using BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Exceptions;
 using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         /// <summary>
         /// Минимальная единица покупки (например от 1).
         /// </summary>
-        public MinimalUnit MinimalUnit { get; }
+        public MinimalUnit MinimalUnit { get; private set; }
 
         /// <summary>
         /// Минимальная цена покупки за единицу
@@ -50,6 +51,44 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
             : this(Guid.NewGuid(), assetType, minimalUnit, purchasePrice) 
         { 
         
+        }
+
+        #endregion
+
+        #region Методы
+
+        /// <summary>
+        /// Изменяет минимальную единицу покупки.
+        /// </summary>
+        /// <param name="newMinimalUnit">Новое значение минимальной единицы.</param>
+        /// <returns>True, если значение изменено; иначе — false.</returns>
+        internal bool ChangeMinimalUnit(MinimalUnit newMinimalUnit)
+        {
+            if (newMinimalUnit is null)
+                throw new ArgumentNullValueException(nameof(newMinimalUnit)); ///!!!! вернутся
+
+            if (MinimalUnit == newMinimalUnit)
+                return false;
+
+            MinimalUnit = newMinimalUnit;
+            return true;
+        }
+
+        /// <summary>
+        /// Изменяет цену покупки.
+        /// </summary>
+        /// <param name="newPurchasePrice">Новое значение цены покупки.</param>
+        /// <returns>True, если значение изменено; иначе — false.</returns>
+        internal bool ChangePurchasePrice(Money newPurchasePrice)
+        {
+            if (newPurchasePrice is null)
+                throw new ArgumentNullValueException(nameof(newPurchasePrice)); ///!!! вернутся (Не получилось списать средства потому что снимаешь больше чем на карте)
+
+            if (PurchasePrice == newPurchasePrice)
+                return false;
+
+            PurchasePrice = newPurchasePrice;
+            return true;
         }
 
         #endregion

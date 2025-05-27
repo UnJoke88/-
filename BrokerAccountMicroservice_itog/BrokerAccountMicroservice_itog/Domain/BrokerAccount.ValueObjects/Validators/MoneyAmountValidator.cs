@@ -16,8 +16,8 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Valid
         /// 
         public void Validate(decimal value)
         {
-            if (value <= 0)
-                throw new MoneyAmountNonPositiveException("Сумма не должна быть неположительной", nameof(value), value);
+            if (value < 0)
+                throw new MoneyAmountNonPositiveException("Сумма не должна быть отрицательной", nameof(value), value);
             if (!IsValidAmount(value))
                 throw new MoneyAmountHasMoreThanTwoDecimalPlacesException("Сумма денег имеет не более двух знаков после запятой (до сотых)", nameof(value), value);
         }

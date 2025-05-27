@@ -4,26 +4,26 @@ using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exception
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Validators
 {
-    public class BrokerNameValidator : IValidator<string>
+    public class PortfolioNumberValidator : IValidator<string>
     {
-        private const int MIN_LENGTH = 3;
-        private const int MAX_LENGTH = 100;
+        public static int LENGTH => 8;
 
         public void Validate(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentNullOrWhiteSpaceException(ExceptionMessages.BROKER_NAME_NOT_NULL_OR_WHITE_SPACE, nameof(value));
+                throw new ArgumentNullOrWhiteSpaceException(ExceptionMessages.PORTFOLIO_NUMBER_NOT_NULL_OR_WHITE_SPACE, nameof(value));
 
-            if (value.Length < MIN_LENGTH)
-                throw new BrokerNameTooShortException(value, MIN_LENGTH);
+            if (!value.All(char.IsDigit))
+                throw new PortfolioNumberFormatException(nameof(value), value);
 
-            if (value.Length > MAX_LENGTH)
-                throw new BrokerNameTooLongException(value, MAX_LENGTH);
+            if (value.Length != LENGTH)
+                throw new PortfolioNumberLengthException(value, LENGTH);
         }
     }
 }

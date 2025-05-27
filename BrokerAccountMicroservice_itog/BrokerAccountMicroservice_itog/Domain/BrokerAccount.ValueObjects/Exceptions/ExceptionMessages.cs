@@ -21,5 +21,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Excep
         public const string EMAIL_NOT_NULL_OR_WHITE_SPACE = "EMAIL не должен быть нулевым, пустым или состоять только из символов пробела";
         public const string BROKER_NAME_NOT_NULL_OR_WHITE_SPACE = "Имя брокера не должно быть нулевым, пустым или состоять только из символов пробела";
         public const string MONEY_AMOUNT_HAS_NOT_MORE_THEN_TWO_DECIMAL_PLACES = "Сумма денег не должна быть с более, чем двумя знаками после запятой";
+        public const string PORTFOLIO_NUMBER_NOT_NULL_OR_WHITE_SPACE = "Номер портфеля не должен быть нулевым, пустым или состоять только из символов пробела";
+        
     }
 }

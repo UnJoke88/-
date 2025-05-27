@@ -1,4 +1,6 @@
 ﻿using BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities.Base;
+using BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Enums;
+using BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Exceptions;
 using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -24,7 +26,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         /// <summary>
         /// Получить денежный баланс клиента.
         /// </summary>
-        public Money CashBalance { get; }
+        public Money CashBalance { get; private set; }
 
         #endregion
 
@@ -35,17 +37,51 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         
         }
 
-        protected Card(Guid id, CardNumber cardNumber, Money cashBalance)
+        protected Card(Guid id, CardNumber cardNumber)
             : base(id)
         {
             CardNumber = cardNumber ?? throw new ArgumentNullValueException(nameof(cardNumber));
-            CashBalance = cashBalance ?? throw new ArgumentNullValueException(nameof(cashBalance));
+            CashBalance = new Money(0);
         }
 
-        public Card(CardNumber cardNumber,Money cashBalance) 
-            : this(Guid.NewGuid(), cardNumber,cashBalance)
+        public Card(CardNumber cardNumber) 
+            : this(Guid.NewGuid(), cardNumber)
         { 
 
+        }
+
+        #endregion
+
+        #region Методы
+
+        /// <summary>
+        /// Пополняет баланс карты, если тип транзакции — Replenishment.
+        /// </summary>
+        /// <param name="amount">Сумма пополнения.</param>
+        /// <param name="type">Тип транзакции.</param>
+        /// <returns>True, если операция выполнена; иначе — false.</returns>
+        public bool Deposit(Money amount, TransactionType type)
+        {
+            if (amount is null || type != TransactionType.Replenishment)
+                return false;
+
+            CashBalance = CashBalance + amount;
+            return true;
+        }
+
+        /// <summary>
+        /// Снимает средства с карты, если тип транзакции — Removing и достаточно средств.
+        /// </summary>
+        /// <param name="amount">Сумма для снятия.</param>
+        /// <param name="type">Тип транзакции.</param>
+        /// <returns>True, если операция выполнена.</returns>
+        public bool Withdraw(Money amount, TransactionType type)
+        {
+            if (amount is null || type != TransactionType.Removing || CashBalance < amount)
+                return false;
+
+            CashBalance = CashBalance - amount;
+            return true;
         }
 
         #endregion

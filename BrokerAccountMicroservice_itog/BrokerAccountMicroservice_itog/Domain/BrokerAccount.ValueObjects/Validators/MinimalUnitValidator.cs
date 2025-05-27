@@ -1,10 +1,11 @@
-﻿using System;
+﻿using AuctionTrading.Domain.ValueObjects.Exceptions;
+using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Base;
+using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Base;
-using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exceptions;
 
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Validators
 {

@@ -1,4 +1,5 @@
 ﻿using BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities.Base;
+using BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Exceptions;
 using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -38,5 +39,8 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         }
         #endregion
 
+        #region Методы
+
+        #endregion
     }
 }
