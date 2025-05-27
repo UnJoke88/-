@@ -17,7 +17,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
     {
         #region Поля
 
-        private readonly Dictionary<Asset, MinimalUnit> _assetHoldings = new();
+        private readonly Dictionary<Asset, Quantity> _assetHoldings = new();
         #endregion
 
         #region Свойства
@@ -71,9 +71,9 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         }
 
         ///<summary> Получить статистику по активам в портфеле: тип, количество, общая стоимость. </summary>
-        public IEnumerable<(AssetType AssetType, MinimalUnit Quantity, Money TotalValue)> GetAssetStatistics()
+        public IEnumerable<(AssetType AssetType, Quantity Quantity, Money TotalValue)> GetAssetStatistics()
         {
-            var result = new HashSet<(AssetType, MinimalUnit, Money)>();
+            var result = new HashSet<(AssetType, Quantity, Money)>();
 
             foreach (var entry in _assetHoldings)
             {
@@ -90,7 +90,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
 
 
         ///<summary> Получить общую стоимость портфеля. </summary>
-        private Money GetTotalPortfolioValue()
+        public Money GetTotalPortfolioValue()
         {
             Money total = new(0);
             foreach (var stat in GetAssetStatistics())

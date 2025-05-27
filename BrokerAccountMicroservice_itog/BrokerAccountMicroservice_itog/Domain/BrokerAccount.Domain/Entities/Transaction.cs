@@ -25,7 +25,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         /// <summary>
         /// Минимальная единица покупки (например от 1).
         /// </summary>
-        public MinimalUnit? Quantity { get; private set; }
+        public Quantity? Quantity { get; private set; }
 
         public Money Amount { get; private set; }
 
@@ -41,20 +41,19 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         }
 
         //Конструктор для Пополнения\снятия карты
-        protected Transaction(Guid id, Client client, DateTime date, TransactionType type,
-                           Asset? asset, MinimalUnit? quantity, Money amount) : base(id)
+        protected Transaction(Guid id, Client client, DateTime date, TransactionType type, Money amount) : base(id)
         {
             Client = client ?? throw new ArgumentNullValueException(nameof(client));
             Date = date;
             Type = type;
-            Asset = asset;
-            Quantity = quantity;
+            Asset = null;
+            Quantity = null;
             Amount = amount ?? throw new ArgumentNullValueException(nameof(amount));
         }
 
         //Конструктор для Покупки\Продажи активов
         protected Transaction(Guid id, Client client, DateTime date, TransactionType type,
-                      Asset? asset, MinimalUnit? quantity) : base(id)
+                      Asset? asset, Quantity? quantity) : base(id)
         {
             Client = client ?? throw new ArgumentNullValueException(nameof(client));
             Date = date;
@@ -65,13 +64,13 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         }
 
 
-        public Transaction(Client client, DateTime date, TransactionType type, Asset? asset, MinimalUnit? quantity, Money amount)
-            : this(Guid.NewGuid(), client, date, type, asset, quantity, amount)
+        public Transaction(Client client, DateTime date, TransactionType type, Money amount)
+            : this(Guid.NewGuid(), client, date, type, amount)
         {
            
         }
 
-        public Transaction(Client client, DateTime date, TransactionType type, Asset? asset, MinimalUnit? quantity)
+        public Transaction(Client client, DateTime date, TransactionType type, Asset? asset, Quantity? quantity)
             : this(Guid.NewGuid(), client, date, type, asset, quantity)
         {
 

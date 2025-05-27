@@ -1,5 +1,4 @@
-﻿using AuctionTrading.Domain.ValueObjects.Exceptions;
-using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Base;
+﻿using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Base;
 using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -9,12 +8,16 @@ using System.Threading.Tasks;
 
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Validators
 {
-    public class MinimalUnitValidator : IValidator<int>
+    public class QuantityValidator : IValidator<int>
     {
         public void Validate(int value)
         {
             if (value < 0)
-                throw new MinimalUnitOutOfRangeException(value);
+                throw new QuantityNotPositiveException(value);
         }
     }
 }
+
+
+
+

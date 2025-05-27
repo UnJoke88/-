@@ -61,9 +61,14 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         #endregion
 
         #region Методы
-        
+
+        //Получение всех транзакций
+        public IReadOnlyCollection<Transaction> Transactions =>
+            _transactions.ToList().AsReadOnly();
+
+
         //Покупка Актива
-        public void BuyAsset(Asset asset, MinimalUnit quantity)
+        public Transaction BuyAsset(Asset asset, Quantity quantity)
         {
             var amount = asset.PurchasePrice * quantity;
             if(!this.Card.Withdraw(amount,TransactionType.Purchase))
@@ -77,10 +82,23 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
             {
                 Portfolio.ApplyTransaction(transaction);
             }
+
+            return transaction;
         }
 
-        public IReadOnlyCollection<Transaction> Transactions =>
-            _transactions.ToList().AsReadOnly();
+        //Пополнение карты клиентом и создание транзакции
+        public Transaction MakeDeposit(Money amount)
+        {
+            if (!this.Card.Deposit(amount, TransactionType.Replenishment))
+            {
+                var incorectTransaction = TransactionStatus.Failed;
+            }
+            var transaction = new Transaction(this, DateTime.Now, TransactionType.Purchase, amount);
+            transaction.SetTransactionStatus(TransactionStatus.Completed);
+            _transactions.Add(transaction);
+
+            return transaction;
+        }
         
 
         #endregion
