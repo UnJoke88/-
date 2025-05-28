@@ -61,7 +61,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
             else if (transaction.Type == TransactionType.Sale)
             {
                 if (!_assetHoldings.ContainsKey(transaction.Asset) || _assetHoldings[transaction.Asset] < transaction.Quantity)
-                    throw new InvalidOperationException("Недостаточное количество актива для продажи.");
+                    throw new InvalidOperationException("Недостаточное количество актива для продажи."); //Создать исключение при ПРОДАЖИ БОЛЬШЕГО ЧИСЛА АКТИВА, ЧЕМ В ПОРТФЕЛЕ
 
                 _assetHoldings[transaction.Asset] -= transaction.Quantity;
 

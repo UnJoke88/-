@@ -63,7 +63,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         #region Методы
 
         //Получение всех транзакций
-        public IReadOnlyCollection<Transaction> Transactions =>
+        public IReadOnlyCollection<Transaction> ShowTransactions => //ShowTransactions - название коллекции транзакций
             _transactions.ToList().AsReadOnly();
 
 
@@ -71,14 +71,12 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         public Transaction BuyAsset(Asset asset, Quantity quantity)
         {
             var amount = asset.PurchasePrice * quantity;
-            if(!this.Card.Withdraw(amount,TransactionType.Purchase))
-            {
-                var incorectTransaction = TransactionStatus.Failed;
-            }
+            var status = this.Card.MakePurchase(amount, TransactionType.Purchase) ? TransactionStatus.Completed : TransactionStatus.Failed; //Сохраняем в переменную результат метода списания денег.=>
+                                                                                                                                        //Если получилось снять и нет ошибок = запись в переменную Complited, если нет, то запись Failed
             var transaction = new Transaction(this, DateTime.Now, TransactionType.Purchase, asset, quantity);
-            transaction.SetTransactionStatus(TransactionStatus.Completed);
+            transaction.SetTransactionStatus(status);
             _transactions.Add(transaction);
-            if(transaction.Status == TransactionStatus.Completed)
+            if (transaction.Status == TransactionStatus.Completed)
             {
                 Portfolio.ApplyTransaction(transaction);
             }
@@ -86,20 +84,55 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
             return transaction;
         }
 
+        //Продажа Актива
+        public Transaction MakeSale(Asset asset, Quantity quantity)
+        {
+            var amount = asset.PurchasePrice * quantity;
+            var status = this.Card.MakeSale(amount, TransactionType.Sale) ? TransactionStatus.Completed : TransactionStatus.Failed; //Сохраняем в переменную результат метода списания денег.=>
+                                                                                                                                            //Если получилось снять и нет ошибок = запись в переменную Complited, если нет, то запись Failed
+            var transaction = new Transaction(this, DateTime.Now, TransactionType.Sale, asset, quantity);
+            transaction.SetTransactionStatus(status);
+            _transactions.Add(transaction);
+            if (transaction.Status == TransactionStatus.Completed)
+            {
+                Portfolio.ApplyTransaction(transaction);
+            }
+
+            return transaction;
+        }
+
+
         //Пополнение карты клиентом и создание транзакции
         public Transaction MakeDeposit(Money amount)
         {
-            if (!this.Card.Deposit(amount, TransactionType.Replenishment))
-            {
-                var incorectTransaction = TransactionStatus.Failed;
-            }
-            var transaction = new Transaction(this, DateTime.Now, TransactionType.Purchase, amount);
-            transaction.SetTransactionStatus(TransactionStatus.Completed);
+            var status = this.Card.MakeDeposit(amount, TransactionType.Replenishment) ? TransactionStatus.Completed : TransactionStatus.Failed;
+            var transaction = new Transaction(this, DateTime.Now, TransactionType.Replenishment, amount);
+            transaction.SetTransactionStatus(status);
             _transactions.Add(transaction);
 
             return transaction;
         }
-        
+
+        //Снятие с карты клиентом и создание транзакции
+        public Transaction MakeWithdraw(Money amount)
+        {
+            var status = this.Card.MakeWithdraw(amount, TransactionType.Removing) ? TransactionStatus.Completed : TransactionStatus.Failed;
+            var transaction = new Transaction(this, DateTime.Now, TransactionType.Removing, amount);
+            transaction.SetTransactionStatus(status);
+            _transactions.Add(transaction);
+
+            return transaction;
+        }
+
+
+
+        //Редактирование имени
+        //internal bool ChangeUsername(Username newUsername)
+        //{
+        //    if (Username == newUsername) return false;
+        //    Username = newUsername;
+        //    return true;
+        //}
 
         #endregion
     }

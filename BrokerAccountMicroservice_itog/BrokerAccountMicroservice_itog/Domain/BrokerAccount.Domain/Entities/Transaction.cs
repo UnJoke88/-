@@ -29,9 +29,12 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
 
         public Money Amount { get; private set; }
 
-    
         public TransactionStatus Status { get; private set; }
 
+        /// <summary>
+        /// Остаток баланса после операций
+        /// </summary>
+        public Money EndBalance { get; private set; } 
         #endregion
 
         #region Конструктор
@@ -49,6 +52,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
             Asset = null;
             Quantity = null;
             Amount = amount ?? throw new ArgumentNullValueException(nameof(amount));
+            EndBalance = Client.Card.CashBalance;
         }
 
         //Конструктор для Покупки\Продажи активов
@@ -61,6 +65,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
             Asset = asset;
             Quantity = quantity;
             Amount = asset.PurchasePrice * Quantity;
+            EndBalance = Client.Card.CashBalance;
         }
 
 

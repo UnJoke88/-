@@ -65,7 +65,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         internal bool ChangeMinimalUnit(MinimalUnit newMinimalUnit)
         {
             if (newMinimalUnit is null)
-                throw new ArgumentNullValueException(nameof(newMinimalUnit)); ///!!!! вернутся
+                throw new ArgumentNullValueException(nameof(newMinimalUnit));
 
             if (MinimalUnit == newMinimalUnit)
                 return false;
@@ -82,7 +82,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         internal bool ChangePurchasePrice(Money newPurchasePrice)
         {
             if (newPurchasePrice is null)
-                throw new ArgumentNullValueException(nameof(newPurchasePrice)); ///!!! вернутся (Не получилось списать средства потому что снимаешь больше чем на карте)
+                throw new ArgumentNullValueException(nameof(newPurchasePrice)); 
 
             if (PurchasePrice == newPurchasePrice)
                 return false;

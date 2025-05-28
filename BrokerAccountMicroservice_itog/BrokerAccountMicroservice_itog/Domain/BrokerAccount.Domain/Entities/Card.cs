@@ -55,14 +55,29 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         #region Методы
 
         /// <summary>
-        /// Пополняет баланс карты, если тип транзакции — Replenishment.
+        /// Пополняет баланс карты, если тип транзакции — Replenishment .
         /// </summary>
         /// <param name="amount">Сумма пополнения.</param>
         /// <param name="type">Тип транзакции.</param>
         /// <returns>True, если операция выполнена; иначе — false.</returns>
-        public bool Deposit(Money amount, TransactionType type)
+        public bool MakeDeposit(Money amount, TransactionType type)
         {
             if (amount is null || type != TransactionType.Replenishment)
+                return false;
+
+            CashBalance = CashBalance + amount;
+            return true;
+        }
+
+        /// <summary>
+        /// Пополняет баланс карты при ПРОДАЖЕ АКТИВА, если тип транзакции — Sale .
+        /// </summary>
+        /// <param name="amount">Сумма пополнения.</param>
+        /// <param name="type">Тип транзакции.</param>
+        /// <returns>True, если операция выполнена; иначе — false.</returns>
+        public bool MakeSale(Money amount, TransactionType type)
+        {
+            if (amount is null || type != TransactionType.Sale)
                 return false;
 
             CashBalance = CashBalance + amount;
@@ -75,7 +90,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         /// <param name="amount">Сумма для снятия.</param>
         /// <param name="type">Тип транзакции.</param>
         /// <returns>True, если операция выполнена.</returns>
-        public bool Withdraw(Money amount, TransactionType type)
+        public bool MakeWithdraw(Money amount, TransactionType type)
         {
             if (amount is null || type != TransactionType.Removing || CashBalance < amount)
                 return false;
@@ -83,6 +98,23 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
             CashBalance = CashBalance - amount;
             return true;
         }
+
+        /// <summary>
+        /// Снимает средства с карты на ПОКУПКУ АКТИВА , если тип транзакции — Purchase и достаточно средств.
+        /// </summary>
+        /// <param name="amount">Сумма для снятия.</param>
+        /// <param name="type">Тип транзакции.</param>
+        /// <returns>True, если операция выполнена.</returns>
+        public bool MakePurchase(Money amount, TransactionType type)
+        {
+            if (amount is null || type != TransactionType.Purchase || CashBalance < amount)
+                return false;
+
+            CashBalance = CashBalance - amount;
+            return true;
+        }
+
+        
 
         #endregion
     }
