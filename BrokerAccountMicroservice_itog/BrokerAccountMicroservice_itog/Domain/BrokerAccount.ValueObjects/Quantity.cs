@@ -10,7 +10,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects
 {
 
     /// <summary>
-    /// Минимальная единица покупки актива.
+    /// Единица для передачи кол-ва актива (В портфеле может быть 0 активов)
     /// </summary>
     public class Quantity(int value)
         : ValueObject<int>(new QuantityValidator(), value)

@@ -89,7 +89,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         {
             var amount = asset.PurchasePrice * quantity;
             var status = this.Card.MakeSale(amount, TransactionType.Sale) ? TransactionStatus.Completed : TransactionStatus.Failed; //Сохраняем в переменную результат метода списания денег.=>
-                                                                                                                                            //Если получилось снять и нет ошибок = запись в переменную Complited, если нет, то запись Failed
+                                                                                                                                    //Если получилось снять и нет ошибок = запись в переменную Complited, если нет, то запись Failed
             var transaction = new Transaction(this, DateTime.Now, TransactionType.Sale, asset, quantity);
             transaction.SetTransactionStatus(status);
             _transactions.Add(transaction);

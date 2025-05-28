@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects
 {
     /// <summary>
-    /// Представляет тип имени сущности (покупателя, администратора и т. д.).
+    /// Представляет тип имени сущности (покупателя).
     /// </summary>
     /// <param name="name">Имя сущности.</param>
     public class FirstName(string name) 

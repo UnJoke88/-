@@ -13,7 +13,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Valid
     {
         public void Validate(int value)
         {
-            if (value < 0)
+            if (value < 1)
                 throw new MinimalUnitOutOfRangeException(value);
         }
     }

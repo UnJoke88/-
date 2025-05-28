@@ -4,7 +4,7 @@ using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Base;
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects
 {
     /// <summary>
-    /// Represents type of the money.
+    ///  Деньги.
     /// </summary>
     /// <param name="amount">The amount of the money.</param>
     public class Money(decimal amountInRub) : ValueObject<decimal>(new MoneyAmountValidator(),

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects
 {
     /// <summary>
-    /// Минимальная единица покупки актива.
+    /// Минимальная единица при покупке актива за одну операцию.
     /// </summary>
     public class MinimalUnit(int value)
         : ValueObject<int>(new MinimalUnitValidator(), value)
