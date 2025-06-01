@@ -30,6 +30,8 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         /// </summary>
         public Money PurchasePrice { get; private set; }
 
+        public Broker Broker { get; private set; }
+
         #endregion
 
         #region Конструктор

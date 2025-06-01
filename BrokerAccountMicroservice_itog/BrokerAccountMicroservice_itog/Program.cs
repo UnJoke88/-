@@ -113,7 +113,7 @@ namespace BrokerAccountMicroservice_itog
             GetPortfelStatistic(portfolio2);//Выводит отчёт в портфеле
 
             ShowClients(Broker);
-            Broker.AddAsset(assetEUR); //--Создан метод и исключение для более точечной настройки списка активов для брокера (реалезуема при расширении логики с рынком)
+            //Broker.AddAsset(assetEUR); //--Создан метод и исключение для более точечной настройки списка активов для брокера (реалезуема при расширении логики с рынком)
             //Broker.AddAsset(assetEUR); - Для вызова ошибки (проверка)
 
         }

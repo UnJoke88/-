@@ -29,6 +29,8 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         public Portfolio Portfolio { get; }
 
         private readonly ICollection<Transaction> _transactions = [];
+        public Broker Broker { get; private set; }
+
 
 
         #endregion
@@ -75,7 +77,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         /// <param name="asset"></param>
         /// <param name="quantity"></param>
         /// <returns></returns>
-        public Transaction BuyAsset(Asset asset, Quantity quantity)
+        public Transaction BuyAsset(Asset asset, Quantity quantity)  //Quantity - количество единиц актива
         {
             var amount = asset.PurchasePrice * quantity;
             var status = this.Card.MakePurchase(amount, TransactionType.Purchase) ? TransactionStatus.Completed : TransactionStatus.Failed; //Сохраняем в переменную результат метода списания денег.=>
