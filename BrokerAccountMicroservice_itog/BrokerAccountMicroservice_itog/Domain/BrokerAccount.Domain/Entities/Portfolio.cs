@@ -43,13 +43,14 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
 
         #region Методы
 
-        ///<summary> Применить транзакцию к портфелю (учитываются только покупка/продажа активов). </summary>
+        /// <summary>
+        /// Применить транзакцию к портфелю (учитываются только покупка/продажа активов)
+        /// </summary>
+        /// <param name="transaction"></param>
+        /// <exception cref="InvalidOperationException"></exception>
         public void ApplyTransaction(Transaction transaction)
         {
             if (transaction.Asset == null) return;
-
-            //var assetType = transaction.Asset.AssetType;
-            //var quantity = (int)(transaction.Amount.Amount / transaction.Asset.Price.Amount);
 
             if (transaction.Type == TransactionType.Purchase)
             {
@@ -61,7 +62,7 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
             else if (transaction.Type == TransactionType.Sale)
             {
                 if (!_assetHoldings.ContainsKey(transaction.Asset) || _assetHoldings[transaction.Asset] < transaction.Quantity)
-                    throw new InvalidOperationException("Недостаточное количество актива для продажи."); //Создать исключение при ПРОДАЖИ БОЛЬШЕГО ЧИСЛА АКТИВА, ЧЕМ В ПОРТФЕЛЕ
+                    throw new SellingMoreAssetsThanInPortfolioException(transaction.Id, transaction.Asset.AssetType, transaction.Quantity); //Создать исключение при ПРОДАЖИ БОЛЬШЕГО ЧИСЛА АКТИВА, ЧЕМ В ПОРТФЕЛЕ
 
                 _assetHoldings[transaction.Asset] -= transaction.Quantity;
 
@@ -70,7 +71,10 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
             }
         }
 
-        ///<summary> Получить статистику по активам в портфеле: тип, количество, общая стоимость. </summary>
+        /// <summary>
+        /// Получить статистику по активам в портфеле: тип, количество, общая стоимость.
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<(AssetType AssetType, Quantity Quantity, Money TotalValue)> GetAssetStatistics()
         {
             var result = new HashSet<(AssetType, Quantity, Money)>();
@@ -89,7 +93,10 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         }
 
 
-        ///<summary> Получить общую стоимость портфеля. </summary>
+        /// <summary>
+        /// Получить общую стоимость портфеля
+        /// </summary>
+        /// <returns></returns>
         public Money GetTotalPortfolioValue()
         {
             Money total = new(0);
@@ -99,14 +106,6 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
             }
             return total;
         }
-
-        /////<summary> Метод-заглушка: находит последнюю транзакцию для типа актива (в реальности должен приходить извне). </summary>
-        //private Transaction? GetLastTransactionForAssetType(AssetType assetType)
-        //{
-        //    // В идеале сюда должен приходить список транзакций из агрегата или сервиса
-        //    return null;
-        //}
-
         #endregion
     }
 }

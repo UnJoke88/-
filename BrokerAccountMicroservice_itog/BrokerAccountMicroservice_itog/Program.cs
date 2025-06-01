@@ -1,5 +1,6 @@
 ﻿using BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities;
 using BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Enums;
+using BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Exceptions;
 using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects;
 using System.Data.Common;
 using System.Security.Cryptography.X509Certificates;
@@ -93,7 +94,7 @@ namespace BrokerAccountMicroservice_itog
 
 
             //Продажа 5 евро после повышения курса
-            Client.MakeSale(assetEUR, new Quantity(11));//Продаем 5 евро
+            //Client.MakeSale(assetEUR, new Quantity(11));//Продаем 5 евро
 
 
             Client2.MakeDeposit(new Money(10000));
@@ -112,6 +113,8 @@ namespace BrokerAccountMicroservice_itog
             GetPortfelStatistic(portfolio2);//Выводит отчёт в портфеле
 
             ShowClients(Broker);
+            Broker.AddAsset(assetEUR); //--Создан метод и исключение для более точечной настройки списка активов для брокера (реалезуема при расширении логики с рынком)
+            //Broker.AddAsset(assetEUR); - Для вызова ошибки (проверка)
 
         }
 

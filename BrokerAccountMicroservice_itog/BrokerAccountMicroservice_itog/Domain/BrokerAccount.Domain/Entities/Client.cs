@@ -18,11 +18,11 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
     {
         #region Свойства
 
-        public FirstName FirstName { get; }
-        public LastName LastName { get; }
-        public MiddleName? MiddleName { get; }
+        public FirstName FirstName { get; private set; }
+        public LastName LastName { get; private set; }
+        public MiddleName? MiddleName { get; private set; }
         public Email Email { get; private set; }
-        public PhoneNumber PhoneNumber { get; private set; }
+        public PhoneNumber PhoneNumber { get; }
 
         public Card Card { get; }
 
@@ -62,12 +62,19 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
 
         #region Методы
 
-        //Получение всех транзакций
+        /// <summary>
+        /// Получение всех транзакций
+        /// </summary>
         public IReadOnlyCollection<Transaction> ShowTransactions => //ShowTransactions - название коллекции транзакций
             _transactions.ToList().AsReadOnly();
 
 
-        //Покупка Актива
+        /// <summary>
+        /// Покупка Актива
+        /// </summary>
+        /// <param name="asset"></param>
+        /// <param name="quantity"></param>
+        /// <returns></returns>
         public Transaction BuyAsset(Asset asset, Quantity quantity)
         {
             var amount = asset.PurchasePrice * quantity;
@@ -84,7 +91,12 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
             return transaction;
         }
 
-        //Продажа Актива
+        /// <summary>
+        /// Продажа Актива
+        /// </summary>
+        /// <param name="asset"></param>
+        /// <param name="quantity"></param>
+        /// <returns></returns>
         public Transaction MakeSale(Asset asset, Quantity quantity)
         {
             var amount = asset.PurchasePrice * quantity;
@@ -102,7 +114,11 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         }
 
 
-        //Пополнение карты клиентом и создание транзакции
+        /// <summary>
+        /// Пополнение карты клиентом и создание транзакции
+        /// </summary>
+        /// <param name="amount"></param>
+        /// <returns></returns>
         public Transaction MakeDeposit(Money amount)
         {
             var status = this.Card.MakeDeposit(amount, TransactionType.Replenishment) ? TransactionStatus.Completed : TransactionStatus.Failed;
@@ -113,7 +129,11 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
             return transaction;
         }
 
-        //Снятие с карты клиентом и создание транзакции
+        /// <summary>
+        /// Снятие с карты клиентом и создание транзакции
+        /// </summary>
+        /// <param name="amount"></param>
+        /// <returns></returns>
         public Transaction MakeWithdraw(Money amount)
         {
             var status = this.Card.MakeWithdraw(amount, TransactionType.Removing) ? TransactionStatus.Completed : TransactionStatus.Failed;
@@ -126,13 +146,53 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
 
 
 
-        //Редактирование имени
-        //internal bool ChangeUsername(Username newUsername)
-        //{
-        //    if (Username == newUsername) return false;
-        //    Username = newUsername;
-        //    return true;
-        //}
+        /// <summary>
+        /// Редактирование имени
+        /// </summary>
+        /// <param name="newFirstName"></param>
+        /// <returns></returns>
+        internal bool ChangeUsername(FirstName newFirstName)
+        {
+            if (FirstName == newFirstName) return false;
+            FirstName = newFirstName;
+            return true;
+        }
+
+        /// <summary>
+        /// Редактирование Фамилии
+        /// </summary>
+        /// <param name="newLastName"></param>
+        /// <returns></returns>
+        internal bool ChangeLastName(LastName newLastName)
+        {
+            if (LastName == newLastName) return false;
+            LastName = newLastName;
+            return true;
+        }
+
+        /// <summary>
+        /// Редактирование Отчества
+        /// </summary>
+        /// <param name="newMiddleName"></param>
+        /// <returns></returns>
+        internal bool ChangeMiddleName(MiddleName newMiddleName)
+        {
+            if (MiddleName == newMiddleName) return false;
+            MiddleName = newMiddleName;
+            return true;
+        }
+
+        /// <summary>
+        /// Редактирование Почты
+        /// </summary>
+        /// <param name="newEmail"></param>
+        /// <returns></returns>
+        internal bool ChangeEmail(Email newEmail)
+        {
+            if (Email == newEmail) return false;
+            Email = newEmail;
+            return true;
+        }
 
         #endregion
     }

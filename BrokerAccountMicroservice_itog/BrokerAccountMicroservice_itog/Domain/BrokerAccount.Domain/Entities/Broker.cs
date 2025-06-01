@@ -3,11 +3,12 @@ using BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Exceptions;
 using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
-using static System.Collections.Specialized.BitVector32;
+
 
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
 {
@@ -15,9 +16,11 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
     {
         #region Свойства
 
-        public BrokerName Name { get; }
+        public BrokerName Name { get; private set;}
 
         private readonly ICollection<Client> _client = [];
+
+        private readonly ICollection<Asset> _asset = [];
 
         #endregion
 
@@ -69,7 +72,9 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
             return true;
         }
 
-        //Получение Список всех клиентов
+        /// <summary>
+        /// Получение Список всех клиентов
+        /// </summary>
         public IReadOnlyCollection<Client> ShowClients => //ShowClients - название коллекции клиентов
             _client.ToList().AsReadOnly();
 
@@ -80,8 +85,44 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         /// <returns></returns>
         public bool AddClient(Client client)
         {
+            if (_client.Contains(client)) //Проверка на то что клиент не повторяется 
+                throw new AddingAnExistingClientException(this.Name, client.Id, client.FirstName, client.LastName, client.MiddleName);
             if (client == null) return false;
             _client.Add(client);
+            return true;
+        }
+
+
+        /// <summary>
+        /// Получение Список всех активов
+        /// </summary>
+        public IReadOnlyCollection<Asset> ShowAsset => //ShowClients - название коллекции клиентов
+            _asset.ToList().AsReadOnly();
+
+        /// <summary>
+        /// Добавление актива как настраиваемый объект в список брокера (в управление брокером)
+        /// </summary>
+        /// <param name="asset"></param>
+        /// <returns></returns>
+        public bool AddAsset(Asset asset)
+        {
+            if (_asset.Contains(asset) && _asset.Any(a => a.AssetType == asset.AssetType))  // Объект не найден, но тип уже есть
+                throw new AddingAnExistingAssetException(this.Name, asset.AssetType);
+            if (asset == null) return false;
+            _asset.Add(asset);                  
+            return true;
+        }
+
+
+        /// <summary>
+        /// Редактирование Имени Брокера
+        /// </summary>
+        /// <param name="newName"></param>
+        /// <returns></returns>
+        internal bool ChangeBrokerName(BrokerName newName)
+        {
+            if (Name == newName) return false;
+            Name = newName;
             return true;
         }
 
