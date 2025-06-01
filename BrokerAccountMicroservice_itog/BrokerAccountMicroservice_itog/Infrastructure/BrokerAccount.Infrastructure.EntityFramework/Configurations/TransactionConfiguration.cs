@@ -15,12 +15,13 @@ namespace BrokerAccountMicroservice_itog.Infrastructure.BrokerAccount.Infrastruc
         public void Configure(EntityTypeBuilder<Transaction> builder)
         {
             builder.HasKey(x => x.Id); // Устанавливает первичный ключ
-            builder.Property(x => x.Id).ValueGeneratedOnAdd(); 
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
-            builder.Property(x => x.Date).IsRequired()
-                .HasConversion(src => src.Kind == DateTimeKind.Utc ? src : 
-                DateTime.SpecifyKind(src, DateTimeKind.Utc),dst => dst.Kind == DateTimeKind.Utc ? dst :
-                DateTime.SpecifyKind(dst, DateTimeKind.Utc)); // Преобразование времени в UTC
+            builder.Property(x => x.Date).IsRequired().HasConversion
+            (
+                src => src.Kind == DateTimeKind.Utc ? src : DateTime.SpecifyKind(src, DateTimeKind.Utc),
+                dst => dst.Kind == DateTimeKind.Utc ? dst : DateTime.SpecifyKind(dst, DateTimeKind.Utc)// Преобразование времени в UTC
+            );
 
             builder.Property(x => x.Type).IsRequired(); // Enum: TransactionType
 
@@ -32,11 +33,11 @@ namespace BrokerAccountMicroservice_itog.Infrastructure.BrokerAccount.Infrastruc
 
             builder.Property(x => x.Status).IsRequired(); // Enum: TransactionStatus
 
-            builder.Property(x => x.Quantity)
+            builder.Property(x => x.Quantity).IsRequired(false)
                 .HasConversion(v => v.Value,v => new Quantity(v)); // Nullable Quantity для активных операций
 
             // Связь с клиентом (обязательная)
-            builder.HasOne(x => x.Client).WithMany().IsRequired();
+            builder.HasOne(x => x.Client).WithMany("_transactions");
 
             // Связь с активом (необязательная, т.к. может быть null при пополнении/снятии)
             builder.HasOne(x => x.Asset).WithMany().IsRequired(false);

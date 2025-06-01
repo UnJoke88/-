@@ -15,7 +15,7 @@ namespace BrokerAccountMicroservice_itog.Infrastructure.BrokerAccount.Infrastruc
         public void Configure(EntityTypeBuilder<Client> builder)
         {
             builder.HasKey(x => x.Id); // Устанавливает первичный ключ
-            builder.Property(x => x.Id).ValueGeneratedOnAdd(); // Property - поле в таблице
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
             builder.Property(x => x.FirstName).IsRequired()
                 .HasConversion(
@@ -23,19 +23,13 @@ namespace BrokerAccountMicroservice_itog.Infrastructure.BrokerAccount.Infrastruc
                     v => new FirstName(v)); // Конвертация ValueObject
 
             builder.Property(x => x.LastName).IsRequired()
-                .HasConversion(
-                    v => v.Value,
-                    v => new LastName(v));
+                .HasConversion(v => v.Value,v => new LastName(v));
 
-            builder.Property(x => x.MiddleName)
-                .HasConversion(
-                    v => v.Value,
-                    v => new MiddleName(v)); 
+            builder.Property(x => x.MiddleName).IsRequired(false)
+                .HasConversion(v => v.Value,v => new MiddleName(v)); 
 
             builder.Property(x => x.Email).IsRequired()
-                .HasConversion(
-                    v => v.Value,
-                    v => new Email(v)); 
+                .HasConversion(v => v.Value,v => new Email(v)); 
 
             builder.Property(x => x.PhoneNumber).IsRequired()
                 .HasConversion(
@@ -51,7 +45,7 @@ namespace BrokerAccountMicroservice_itog.Infrastructure.BrokerAccount.Infrastruc
                 .HasForeignKey<Client>(x => x.Portfolio).IsRequired();
 
             // Коллекция транзакций
-            builder.HasMany<Transaction>("_transactions").WithOne(x => x.Client);
+            builder.HasMany<Transaction>().WithOne(x => x.Client);
 
             //Не учитывать это свойство при построении таблицы в базе данных (Не создавать для него колонку или навигацию).
             builder.Ignore(x => x.ShowTransactions);
