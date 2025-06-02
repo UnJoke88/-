@@ -1,5 +1,4 @@
-﻿using AuctionTrading.Domain.ValueObjects.Exceptions;
-using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Base;
+﻿using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Base;
 using BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exceptions;
 using System;
 using System.Collections.Generic;

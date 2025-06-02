@@ -26,8 +26,6 @@ namespace BrokerAccountMicroservice_itog.Infrastructure.BrokerAccount.Infrastruc
 
             builder.Ignore(x => x.AssetEntries); // геттер, не нужно мапить
             builder.Ignore(x => x.TotalValue);   // вычисляется по ходу
-            builder.Ignore(x => x.GetAssetStatistics);
-            builder.Ignore(x => x.GetTotalPortfolioValue);
         }
     }
 }

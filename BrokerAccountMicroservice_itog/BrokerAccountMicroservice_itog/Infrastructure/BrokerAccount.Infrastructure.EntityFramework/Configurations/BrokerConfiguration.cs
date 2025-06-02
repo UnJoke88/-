@@ -22,7 +22,10 @@ namespace BrokerAccountMicroservice_itog.Infrastructure.BrokerAccount.Infrastruc
                 .HasConversion(name => name.Value, value => new BrokerName(value)); // Конвертация ValueObject
 
             // Настраиваем связь с клиентами. У брокера коллекция _client, у клиента пока нет ссылки на брокера
-            builder.HasMany<Client>("_client").WithOne();
+            builder.HasMany<Client>("_client").WithOne(x => x.Broker)
+                .HasForeignKey(x => x.BrokerId)
+                .IsRequired();
+
 
             // Настраиваем связь с активами. У брокера коллекция _asset, у актива есть свойство Broker
             builder.HasMany<Asset>("_asset").WithOne(x => x.Broker);
@@ -31,9 +34,6 @@ namespace BrokerAccountMicroservice_itog.Infrastructure.BrokerAccount.Infrastruc
             builder.Ignore(x => x.ShowClients);
             builder.Ignore(x => x.ShowAsset);
 
-           
-            builder.Navigation("Clients").AutoInclude();
-            builder.Navigation("Assets").AutoInclude();
         }
     }
 }

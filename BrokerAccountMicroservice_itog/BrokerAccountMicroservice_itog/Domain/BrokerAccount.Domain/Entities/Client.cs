@@ -29,9 +29,10 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         public Portfolio Portfolio { get; }
 
         private readonly ICollection<Transaction> _transactions = [];
+        public Guid BrokerId { get; private set; }
         public Broker Broker { get; private set; }
-
-
+        public Guid CardId { get; private set; }
+        public Guid PortfolioId { get; private set; }
 
         #endregion
 

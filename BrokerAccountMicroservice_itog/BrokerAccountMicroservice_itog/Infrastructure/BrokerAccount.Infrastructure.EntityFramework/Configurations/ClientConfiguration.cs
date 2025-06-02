@@ -36,16 +36,22 @@ namespace BrokerAccountMicroservice_itog.Infrastructure.BrokerAccount.Infrastruc
                     v => v.Value,
                     v => new PhoneNumber(v));
 
+            // ... остальной код
+
+            builder.HasOne(x => x.Broker).WithMany()
+                .HasForeignKey(x => x.BrokerId)
+                .IsRequired();
+
+
             // Внешний ключ и связь с Card (один к одному)
             builder.HasOne(x => x.Card).WithOne()
-                .HasForeignKey<Client>(x => x.Card).IsRequired();
+                .HasForeignKey<Client>("CardId")
+                .IsRequired();
 
             // Внешний ключ и связь с Portfolio (один к одному)
             builder.HasOne(x => x.Portfolio).WithOne()
-                .HasForeignKey<Client>(x => x.Portfolio).IsRequired();
-
-            // Коллекция транзакций
-            builder.HasMany<Transaction>().WithOne(x => x.Client);
+                .HasForeignKey<Client>("PortfolioId")
+                .IsRequired();
 
             //Не учитывать это свойство при построении таблицы в базе данных (Не создавать для него колонку или навигацию).
             builder.Ignore(x => x.ShowTransactions);

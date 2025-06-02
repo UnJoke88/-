@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AuctionTrading.Domain.ValueObjects.Exceptions
+namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.ValueObjects.Exceptions
 {
     /// <summary>
     /// The exception that is thrown when one of the string arguments is null, empty or consists only of white-space characters. 
