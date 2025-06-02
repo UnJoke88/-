@@ -11,7 +11,7 @@ namespace BrokerAccountMicroservice_itog
     internal class Program
     {
         static void Main(string[] args)
-        {
+       {
             var asset = new Asset(AssetType.RUB, new MinimalUnit(1), new Money(50));
             asset.ChangeMinimalUnit(new MinimalUnit(1));
 

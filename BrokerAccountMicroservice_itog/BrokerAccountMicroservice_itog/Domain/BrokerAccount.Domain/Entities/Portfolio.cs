@@ -17,7 +17,9 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
     {
         #region Поля
 
-        private readonly Dictionary<Asset, Quantity> _assetHoldings = new();
+        private readonly ICollection<PortfolioEntry> _entries = new HashSet<PortfolioEntry>();
+
+        public IReadOnlyCollection<PortfolioEntry> AssetEntries => (IReadOnlyCollection<PortfolioEntry>)_entries;
         #endregion
 
         #region Свойства
@@ -52,22 +54,34 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         {
             if (transaction.Asset == null) return;
 
+            var entry = _entries.FirstOrDefault(e => e.Asset.Id == transaction.Asset.Id); //при покупке — нужно ли увеличить количество уже существующего актива,
+                                                                                          //при продаже — достаточно ли актива, чтобы уменьшить количество.
+
             if (transaction.Type == TransactionType.Purchase)
             {
-                if (_assetHoldings.ContainsKey(transaction.Asset))
-                    _assetHoldings[transaction.Asset] += transaction.Quantity;
+                if (entry != null)
+                    entry.Quantity += transaction.Quantity;
                 else
-                    _assetHoldings[transaction.Asset] = transaction.Quantity;
+                {
+                    _entries.Add(new PortfolioEntry
+                    {
+                        Asset = transaction.Asset,
+                        AssetId = transaction.Asset.Id,
+                        Quantity = transaction.Quantity,
+                        Portfolio = this,
+                        PortfolioId = this.Id
+                    });
+                }
             }
             else if (transaction.Type == TransactionType.Sale)
             {
-                if (!_assetHoldings.ContainsKey(transaction.Asset) || _assetHoldings[transaction.Asset] < transaction.Quantity)
-                    throw new SellingMoreAssetsThanInPortfolioException(transaction.Id, transaction.Asset.AssetType, transaction.Quantity); //Создать исключение при ПРОДАЖИ БОЛЬШЕГО ЧИСЛА АКТИВА, ЧЕМ В ПОРТФЕЛЕ
+                if (entry == null || entry.Quantity < transaction.Quantity)
+                    throw new SellingMoreAssetsThanInPortfolioException(transaction.Id, transaction.Asset.AssetType, transaction.Quantity);
 
-                _assetHoldings[transaction.Asset] -= transaction.Quantity;
+                entry.Quantity -= transaction.Quantity;
 
-                if (_assetHoldings[transaction.Asset] == 0)
-                    _assetHoldings.Remove(transaction.Asset);
+                if (entry.Quantity.Value == 0)
+                    _entries.Remove(entry);
             }
         }
 
@@ -77,19 +91,13 @@ namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
         /// <returns></returns>
         public IEnumerable<(AssetType AssetType, Quantity Quantity, Money TotalValue)> GetAssetStatistics()
         {
-            var result = new HashSet<(AssetType, Quantity, Money)>();
-
-            foreach (var entry in _assetHoldings)
+            foreach (var entry in _entries)
             {
-                var assetType = entry.Key.AssetType;
-                var quantity = entry.Value;
-
-                var totalValue = entry.Key.PurchasePrice * quantity;
-
-                result.Add((assetType, quantity, totalValue));
+                var assetType = entry.Asset.AssetType;
+                var quantity = entry.Quantity;
+                var value = entry.Asset.PurchasePrice * quantity;
+                yield return (assetType, quantity, value);
             }
-
-            return result;
         }
 
 

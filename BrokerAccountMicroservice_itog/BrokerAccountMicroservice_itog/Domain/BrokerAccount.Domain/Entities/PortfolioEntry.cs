@@ -4,14 +4,17 @@ using System;
 
 namespace BrokerAccountMicroservice_itog.Domain.BrokerAccount.Domain.Entities
 {
-    public class PortfolioEntry : Entity<Guid>
+    /// <summary>
+    /// Вспомогательная сущность для вывода статистики актива в БД
+    /// </summary>
+    public class PortfolioEntry : Entity<Guid> 
     {
-        public Asset Asset { get; set; }
-        public Guid AssetId { get; set; }
+        public Guid AssetId { get; set; }             // Foreign Key
+        public Asset Asset { get; set; }              // Навигация
 
-        public Quantity Quantity { get; set; }
+        public Quantity Quantity { get; set; }        // Значение
 
-        public Portfolio Portfolio { get; set; }
-        public Guid PortfolioId { get; set; }
+        public Guid PortfolioId { get; set; }         // Foreign Key
+        public Portfolio Portfolio { get; set; }      // Навигация
     }
 }

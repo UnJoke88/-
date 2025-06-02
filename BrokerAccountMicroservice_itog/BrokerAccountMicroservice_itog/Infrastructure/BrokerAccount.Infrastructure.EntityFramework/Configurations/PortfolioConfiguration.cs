@@ -14,22 +14,20 @@ namespace BrokerAccountMicroservice_itog.Infrastructure.BrokerAccount.Infrastruc
     {
         public void Configure(EntityTypeBuilder<Portfolio> builder)
         {
-            builder.HasKey(x => x.Id); // Устанавливает первичный ключ
+            builder.HasKey(x => x.Id); // PK
             builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
             builder.Property(x => x.PortfolioNumber).IsRequired()
-                .HasConversion(v => v.Value,v => new PortfolioNumber(v)); // Конвертация ValueObject
+                .HasConversion(v => v.Value,v => new PortfolioNumber(v)); 
 
-            // Игнорируем вычисляемое свойство общей стоимости портфеля (не хранится в БД)
-            builder.Ignore(x => x.TotalValue);
+            builder.HasMany<PortfolioEntry>("_entries").WithOne(x => x.Portfolio)
+                .HasForeignKey(x => x.PortfolioId)
+                .IsRequired(); // связь с PortfolioEntry
 
-            // Игнорируем метод GetAssetStatistics() — EF не должен пытаться сопоставить его
+            builder.Ignore(x => x.AssetEntries); // геттер, не нужно мапить
+            builder.Ignore(x => x.TotalValue);   // вычисляется по ходу
             builder.Ignore(x => x.GetAssetStatistics);
-
-            // Игнорируем метод GetTotalPortfolioValue() — это логика на уровне домена
             builder.Ignore(x => x.GetTotalPortfolioValue);
-
-            // Внутренний словарь _assetHoldings не настраивается как навигация
         }
     }
 }
