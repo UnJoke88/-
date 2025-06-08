@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BrokerAccountMicroservice_itog.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250602110508_InitialCreate")]
+    [Migration("20250608173802_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

@@ -23,55 +23,34 @@ namespace BrokerAccountMicroservice_itog
             //card.Withdraw(new Money(200), TransactionType.Removing);
             //Console.WriteLine($"Баланс карты: {card.CashBalance} RUB");
             //Console.WriteLine();
+            Console.WriteLine("==== История операций портфеля ==== ");
 
+            // Шаг 1 Регистрация брокера и создание актива
+            var Broker = new Broker(new BrokerName("jOKER"));
             var assetEUR = new Asset(AssetType.EUR, new MinimalUnit(1), new Money(80)); //Указываем цену Eвро за штуку = 80 руб
             var assetGOLD = new Asset(AssetType.GOLD, new MinimalUnit(1), new Money(10000));
             var assetUSD = new Asset(AssetType.USD, new MinimalUnit(1), new Money(60));
+
+            //Шаг 2 Создание карты и портфеля
             var card2 = new Card(new CardNumber("1111111111111111")); //Указываем номер карты (16 цифр)
-            var card3 = new Card(new CardNumber("1111111122222222")); //Указываем номер карты (16 цифр)
             var portfolio1 = new Portfolio(new PortfolioNumber("45345325")); //Указываем номер портфеля (8 цифр)
-            var portfolio2 = new Portfolio(new PortfolioNumber("86576434")); //Указываем номер портфеля (8 цифр)
+            //var portfolio2 = new Portfolio(new PortfolioNumber("86576434")); //Указываем номер портфеля (8 цифр)
 
-            //Создаём Брокера
-            var Broker = new Broker(new BrokerName("jOKER"));
+            //var card3 = new Card(new CardNumber("1111111122222222")); //Указываем номер карты (16 цифр)
+            //var portfolio2 = new Portfolio(new PortfolioNumber("86576434")); //Указываем номер портфеля (8 цифр)
 
-            //Создаём Клиента со всеми данными
-            var Client = new Client(new FirstName("Bella"), new LastName("Rin"), new MiddleName("John"), //Чтобы не указывать отчество пропишем null 
+            // Шаг 3 Регистрация клиента
+            var Client = new Client(new FirstName("Bella"), new LastName("Rin"), new MiddleName("John"),
                 new Email("gggooolll228@mail.ru"), new PhoneNumber("78005553535"), card2, portfolio1);
 
-            var Client2 = new Client(new FirstName("Tim"), new LastName("Reyet"), new MiddleName("Lenon"), //Чтобы не указывать отчество пропишем null 
-                new Email("fdssdfdfd@gmail.com"), new PhoneNumber("78222222225"), card3, portfolio2);
-
-            //Добавляем клиентов под контроль брокера
+            //Шаг 4 Добавляем клиентов под контроль брокера
             Broker.AddClient(Client);
-            Broker.AddClient(Client2);
+            //Broker.AddClient(Client2);
 
-            Console.WriteLine($"{Client.Id} {Client.FirstName} " + $"{Client.LastName} {Client.MiddleName} {Client.Email}" +
-                $" {Client.PhoneNumber} {Client.Card.CardNumber} {Client.Portfolio.PortfolioNumber}");
+            // Шаг 5 Пополнение
+            Client.MakeDeposit(new Money(30000));//Пополняем карту клиента на 30000
 
-            Console.WriteLine($"{Client2.Id} {Client2.FirstName} " + $"{Client2.LastName} {Client2.MiddleName} {Client2.Email}" +
-                $" {Client2.PhoneNumber} {Client2.Card.CardNumber} {Client2.Portfolio.PortfolioNumber}");
-
-
-            Console.WriteLine();
-
-            //Проверка баланса карты
-            Console.WriteLine($"Баланс карты: {card2.CashBalance} RUB"); //Баланс карты 0 рублей
-
-
-            Console.WriteLine();
-            Console.WriteLine("==== История операций портфеля ==== ");
-            
-
-            Client.MakeDeposit(new Money(1500));//Пополняем карту на 1500 
-            //Попробуем снять денег больше 1500
-            Client.MakeWithdraw(new Money(2000));
-
-
-            Console.WriteLine();
-
-
-            //Активы
+            // Шаг 6 Покупка активов и вывод портфеля
             Client.BuyAsset(assetEUR, new Quantity(5)); //Указываем количество актива для покупки
             Client.BuyAsset(assetGOLD, new Quantity(2));
             Client.BuyAsset(assetUSD, new Quantity(2));
@@ -79,40 +58,91 @@ namespace BrokerAccountMicroservice_itog
 
             Console.WriteLine();
 
-            //Добавляем ещё 5 евро к имеющимся
-            Client.BuyAsset(assetEUR, new Quantity(5)); //Добавляем 5 евро
-            GetPortfelStatistic(portfolio1);//Выводит отчёт в портфеле
-
-            Console.WriteLine();
-
-
-            //Меняем курс евро с 80 на 90 руб 
+            //Шаг 7 Меняем курс евро с 80 на 90 руб и проверяем портфель
             Broker.SetPrice(assetEUR, new Money(90)); //Меняем цену евро с 80 на 90 руб
             GetPortfelStatistic(portfolio1);//Выводит отчёт в портфеле
 
-            Console.WriteLine();
+            // Шаг 8 Выводит сводную информацию по транзакции
+            ShowTransaction(Client);
+
+            // Шаг 9 Брокер проверяет данные клиента(ов)
+            ShowClients(Broker);
+
+            ////var Client2 = new Client(new FirstName("Tim"), new LastName("Reyet"), new MiddleName("Lenon"), //Чтобы не указывать отчество пропишем null 
+            ////    new Email("fdssdfdfd@gmail.com"), new PhoneNumber("78222222225"), card3, portfolio2);
+
+            ////Добавляем клиентов под контроль брокера
+            //Broker.AddClient(Client);
+            ////Broker.AddClient(Client2);
+
+
+            //Console.WriteLine($"{Client.Id} {Client.FirstName} " + $"{Client.LastName} {Client.MiddleName} {Client.Email}" +
+            //    $" {Client.PhoneNumber} {Client.Card.CardNumber} {Client.Portfolio.PortfolioNumber}");
+
+            ////Console.WriteLine($"{Client2.Id} {Client2.FirstName} " + $"{Client2.LastName} {Client2.MiddleName} {Client2.Email}" +
+            ////    $" {Client2.PhoneNumber} {Client2.Card.CardNumber} {Client2.Portfolio.PortfolioNumber}");
+
+
+            //Console.WriteLine();
+
+            ////Проверка баланса карты
+            //Console.WriteLine($"Баланс карты: {card2.CashBalance} RUB"); //Баланс карты 0 рублей
+
+
+            //Console.WriteLine();
+            //Console.WriteLine("==== История операций портфеля ==== ");
+
+
+            //Client.MakeDeposit(new Money(1500));//Пополняем карту на 1500 
+            ////Попробуем снять денег больше 1500
+            //Client.MakeWithdraw(new Money(2000));
+
+
+            //Console.WriteLine();
+
+
+            ////Активы
+            //Client.BuyAsset(assetEUR, new Quantity(5)); //Указываем количество актива для покупки
+            //Client.BuyAsset(assetGOLD, new Quantity(2));
+            //Client.BuyAsset(assetUSD, new Quantity(2));
+            //GetPortfelStatistic(portfolio1);//Выводит отчёт в портфеле
+
+            //Console.WriteLine();
+
+            ////Добавляем ещё 5 евро к имеющимся
+            //Client.BuyAsset(assetEUR, new Quantity(5)); //Добавляем 5 евро
+            //GetPortfelStatistic(portfolio1);//Выводит отчёт в портфеле
+
+            //Console.WriteLine();
+
+
+            ////Меняем курс евро с 80 на 90 руб 
+            //Broker.SetPrice(assetEUR, new Money(90)); //Меняем цену евро с 80 на 90 руб
+            //GetPortfelStatistic(portfolio1);//Выводит отчёт в портфеле
+
+            //Console.WriteLine();
 
 
             //Продажа 5 евро после повышения курса
             //Client.MakeSale(assetEUR, new Quantity(11));//Продаем 5 евро
 
 
-            Client2.MakeDeposit(new Money(10000));
-            Client2.MakeWithdraw(new Money(4000));
-            Client2.MakeDeposit(new Money(10000));
+            //Client2.MakeDeposit(new Money(10000));
+            //Client2.MakeWithdraw(new Money(4000));
+            //Client2.MakeDeposit(new Money(10000));
 
-            Client2.BuyAsset(assetGOLD, new Quantity(1));
-            Broker.SetPrice(assetGOLD, new Money(12000));
-            Client2.MakeSale(assetGOLD, new Quantity(1));
+            //Client2.BuyAsset(assetGOLD, new Quantity(1));
+            //Broker.SetPrice(assetGOLD, new Money(12000));
+            //Client2.MakeSale(assetGOLD, new Quantity(1));
 
 
-            ShowTransaction(Client); //Выводит сводную информацию по транзакции
-            GetPortfelStatistic(portfolio1);//Выводит отчёт в портфеле
+            //ShowTransaction(Client); //Выводит сводную информацию по транзакции
+            //GetPortfelStatistic(portfolio1);//Выводит отчёт в портфеле
 
-            ShowTransaction(Client2); //Выводит сводную информацию по транзакции
-            GetPortfelStatistic(portfolio2);//Выводит отчёт в портфеле
+            //ShowTransaction(Client2); //Выводит сводную информацию по транзакции
+            //GetPortfelStatistic(portfolio2);//Выводит отчёт в портфеле
 
-            ShowClients(Broker);
+            //ShowClients(Broker);
             //Broker.AddAsset(assetEUR); //--Создан метод и исключение для более точечной настройки списка активов для брокера (реалезуема при расширении логики с рынком)
             //Broker.AddAsset(assetEUR); - Для вызова ошибки (проверка)
 
@@ -140,7 +170,7 @@ namespace BrokerAccountMicroservice_itog
                 {
                     Console.WriteLine($"\nИмя клиента: {transaction.Client.FirstName} \nФамилия клиента: {transaction.Client.LastName} " +
                         $"\nВремя транзакции: {transaction.Date} \nТип транзакции: {transaction.Type} \n" +
-                        $"Тип актива: Не указан \n Сумма: {transaction.Amount} \nСтатус: {transaction.Status} \nОстаток на балансе: {transaction.EndBalance} RUB \n");
+                        $"Тип актива: Не указан \nСумма: {transaction.Amount} \nСтатус: {transaction.Status} \nОстаток на балансе: {transaction.EndBalance} RUB \n");
                 }
                 else
                 {
